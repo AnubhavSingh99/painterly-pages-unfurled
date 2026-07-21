@@ -801,6 +801,6 @@ export function renderSpread(
       return <Ch3Closing signature={ctx.signature} onSign={ctx.onSign} onUnlock={ctx.onUnlock} />;
     case "gallery": return <GallerySpread unlocked={ctx.unlocked} />;
     case "credits": return <CreditsSpread />;
-    default: return <Page tone="paper" />;
+    default: return <Page tone="paper"><div /></Page>;
   }
 }
