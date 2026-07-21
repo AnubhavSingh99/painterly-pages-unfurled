@@ -13,6 +13,8 @@ export function Vignette() {
 }
 
 export function DustField({ count = 26, className = "" }: { count?: number; className?: string }) {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
   const motes = useMemo(
     () =>
       Array.from({ length: count }).map((_, i) => ({
@@ -28,6 +30,7 @@ export function DustField({ count = 26, className = "" }: { count?: number; clas
       })),
     [count]
   );
+  if (!mounted) return <div className={`pointer-events-none absolute inset-0 z-30 ${className}`} aria-hidden />;
   return (
     <div className={`pointer-events-none absolute inset-0 z-30 overflow-hidden ${className}`} aria-hidden>
       {motes.map((m) => (
