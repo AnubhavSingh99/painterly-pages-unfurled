@@ -16,7 +16,7 @@ export const Route = createFileRoute("/")({
       {
         property: "og:description",
         content:
-          "A cinematic digital storybook. Open the cover on an artist's desk and enter Copperline.",
+          "Open a hand-painted digital sketchbook found in a fantasy-industrial workshop. Turn pages, uncover hidden ink, and read Vess Marlow's story in three illustrated chapters.",
       },
       { property: "og:type", content: "book" },
       { name: "twitter:card", content: "summary_large_image" },
