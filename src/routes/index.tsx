@@ -3,10 +3,14 @@ import { useState } from "react";
 import deskBook from "@/assets/aarvi/first-character.png";
 import {
   DustField,
+  GildedDivider,
   GrainOverlay,
+  InkSplatter,
   ParallaxLayer,
   ParallaxScene,
   Vignette,
+  WatercolorBlooms,
+  WaxSeal,
 } from "@/components/atoms";
 
 export const Route = createFileRoute("/")({
@@ -45,6 +49,11 @@ function DeskPage() {
       />
 
       <ParallaxScene className="relative h-full w-full" strength={18}>
+        {/* Watercolor blooms deep back */}
+        <ParallaxLayer depth={0.2} className="absolute inset-0 pointer-events-none">
+          <WatercolorBlooms />
+        </ParallaxLayer>
+
         {/* Back layer — soft god-rays */}
         <ParallaxLayer depth={0.3} className="absolute inset-0 pointer-events-none">
           <div
@@ -82,16 +91,24 @@ function DeskPage() {
         </ParallaxLayer>
 
         {/* Title, top */}
-        <div className="pointer-events-none absolute top-8 md:top-12 left-1/2 -translate-x-1/2 text-center z-20">
-          <div className="font-display text-[10px] md:text-xs tracking-[0.6em] text-gold/80">
-            VOLUME · I
-          </div>
-          <h1 className="mt-2 font-display font-black text-paper text-3xl md:text-5xl leading-none drop-shadow-[0_4px_0_rgba(0,0,0,0.6)]">
+        <div className="pointer-events-none absolute top-8 md:top-12 left-1/2 -translate-x-1/2 text-center z-20 w-[min(92vw,900px)]">
+          <div className="etched-label text-[10px] md:text-xs">VOLUME · I</div>
+          <h1 className="gold-leaf mt-3 font-display font-black text-4xl md:text-6xl leading-[0.95] drop-shadow-[0_4px_0_rgba(0,0,0,0.55)]">
             THE WORLD IN HER MARGINS
           </h1>
-          <div className="mt-2 font-hand text-xl md:text-2xl text-paper/80">
+          <GildedDivider className="mt-4 mx-auto w-64" />
+          <div className="mt-2 font-hand text-xl md:text-2xl text-paper/85">
             the complete character archive, from first sketch to comic universe.
           </div>
+        </div>
+
+        {/* Ink splatters framing the desk */}
+        <InkSplatter className="absolute top-24 left-6 opacity-70 rotate-[-14deg]" size={180} />
+        <InkSplatter className="absolute bottom-28 right-10 opacity-60 rotate-[22deg]" size={220} />
+
+        {/* Wax seal, top-right */}
+        <div className="absolute top-8 right-8 z-20">
+          <WaxSeal monogram="A" />
         </div>
 
         {/* CTA, bottom */}
@@ -105,7 +122,7 @@ function DeskPage() {
             onClick={() => {
               setOpening(true);
             }}
-            className="brass-button group rounded-sm px-6 py-3 font-display text-xs md:text-sm tracking-[0.5em] uppercase text-paper flex items-center gap-3"
+            className="brass-button candle-glow group rounded-sm px-6 py-3 font-display text-xs md:text-sm tracking-[0.5em] uppercase text-paper flex items-center gap-3 relative overflow-hidden"
           >
             <span
               className="inline-block h-2 w-2 rounded-full bg-ember"
@@ -121,6 +138,10 @@ function DeskPage() {
                 animation: "ember-flicker 1.4s ease-in-out infinite",
                 boxShadow: "0 0 12px var(--color-ember)",
               }}
+            />
+            <span
+              className="pointer-events-none absolute inset-y-0 w-1/3 bg-gradient-to-r from-transparent via-paper/25 to-transparent"
+              style={{ animation: "shimmer-sweep 4.5s ease-in-out infinite" }}
             />
           </Link>
           <div className="mt-4 font-hand text-lg text-paper/60">

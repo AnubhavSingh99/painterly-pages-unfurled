@@ -279,3 +279,103 @@ export function ParallaxLayer({
     </div>
   );
 }
+
+/* ============================================================
+   Watercolor blooms — soft pigment washes behind content
+   ============================================================ */
+
+export function WatercolorBlooms({
+  className = "",
+  blooms,
+}: {
+  className?: string;
+  blooms?: { top: string; left: string; size: number; color: string; opacity?: number }[];
+}) {
+  const defaults = [
+    { top: "8%", left: "6%", size: 320, color: "var(--color-crimson)", opacity: 0.35 },
+    { top: "62%", left: "72%", size: 380, color: "var(--color-dusk)", opacity: 0.4 },
+    { top: "44%", left: "38%", size: 260, color: "var(--color-teal)", opacity: 0.28 },
+    { top: "18%", left: "78%", size: 220, color: "var(--color-ember)", opacity: 0.22 },
+  ];
+  const items = blooms ?? defaults;
+  return (
+    <div className={`pointer-events-none absolute inset-0 overflow-hidden ${className}`} aria-hidden>
+      {items.map((b, i) => (
+        <span
+          key={i}
+          className="watercolor-bloom"
+          style={{
+            top: b.top,
+            left: b.left,
+            width: `${b.size}px`,
+            height: `${b.size}px`,
+            background: `radial-gradient(circle at 40% 40%, ${b.color}, transparent 70%)`,
+            opacity: b.opacity ?? 0.4,
+            animation: `slow-drift ${14 + i * 3}s ease-in-out ${-i * 2}s infinite`,
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
+/* ============================================================
+   Wax seal — pressed medallion with monogram
+   ============================================================ */
+
+export function WaxSeal({
+  monogram = "A",
+  className = "",
+}: {
+  monogram?: string;
+  className?: string;
+}) {
+  return (
+    <span className={`wax-seal ${className}`} aria-hidden>
+      <span className="text-2xl leading-none" style={{ textShadow: "0 1px 0 rgba(0,0,0,0.5)" }}>
+        {monogram}
+      </span>
+    </span>
+  );
+}
+
+/* ============================================================
+   Ink splatter cluster — decorative fleck field
+   ============================================================ */
+
+export function InkSplatter({
+  className = "",
+  size = 200,
+}: {
+  className?: string;
+  size?: number;
+}) {
+  return (
+    <div
+      className={`ink-splatter pointer-events-none ${className}`}
+      style={{ width: size, height: size }}
+      aria-hidden
+    />
+  );
+}
+
+/* ============================================================
+   Gilded divider — thin gold rule with diamond
+   ============================================================ */
+
+export function GildedDivider({ className = "" }: { className?: string }) {
+  return (
+    <div className={`flex items-center gap-3 ${className}`} aria-hidden>
+      <span className="h-px flex-1 bg-gradient-to-r from-transparent via-gold/70 to-transparent" />
+      <span
+        className="h-2 w-2 rotate-45"
+        style={{
+          background: "linear-gradient(135deg, #f4d580, #7a5a1e)",
+          boxShadow: "0 0 8px rgba(184,137,47,0.6)",
+        }}
+      />
+      <span className="h-px flex-1 bg-gradient-to-r from-transparent via-gold/70 to-transparent" />
+    </div>
+  );
+}
+
