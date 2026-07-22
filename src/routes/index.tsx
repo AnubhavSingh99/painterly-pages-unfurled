@@ -49,6 +49,11 @@ function DeskPage() {
       />
 
       <ParallaxScene className="relative h-full w-full" strength={18}>
+        {/* Watercolor blooms deep back */}
+        <ParallaxLayer depth={0.2} className="absolute inset-0 pointer-events-none">
+          <WatercolorBlooms />
+        </ParallaxLayer>
+
         {/* Back layer — soft god-rays */}
         <ParallaxLayer depth={0.3} className="absolute inset-0 pointer-events-none">
           <div
