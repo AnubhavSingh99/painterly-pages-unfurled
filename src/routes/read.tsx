@@ -764,6 +764,182 @@ function ReadPage() {
         )}
       </AnimatePresence>
 
+      {/* Settings overlay */}
+      <AnimatePresence>
+        {settingsOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 z-50 bg-ink-black/85 backdrop-blur-sm flex items-center justify-center px-6"
+            onClick={() => setSettingsOpen(false)}
+          >
+            <motion.div
+              initial={{ y: 20, scale: 0.98, opacity: 0 }}
+              animate={{ y: 0, scale: 1, opacity: 1 }}
+              className="relative max-w-md w-full paper-surface p-8 rounded-sm text-ink-black"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="font-display text-xs tracking-[0.5em] text-crimson">READER SETTINGS</div>
+              <h2 className="mt-1 font-display font-black text-2xl">Adjust your reading</h2>
+
+              <div className="mt-6 space-y-5">
+                <div>
+                  <div className="font-display text-[10px] tracking-[0.3em] uppercase text-ink-black/60 mb-2">
+                    Parchment
+                  </div>
+                  <div className="flex gap-2">
+                    {(["dark", "cream"] as const).map((t) => (
+                      <button
+                        key={t}
+                        type="button"
+                        onClick={() => setTheme(t)}
+                        className={`flex-1 rounded-sm px-3 py-2 font-serif text-sm border ${
+                          state.theme === t
+                            ? "bg-ember text-paper border-ember"
+                            : "bg-paper-warm/40 border-ink-black/20"
+                        }`}
+                      >
+                        {t === "dark" ? "Midnight" : "Aged cream"}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <label className="flex items-center justify-between">
+                  <span className="font-serif">Reduced motion</span>
+                  <input
+                    type="checkbox"
+                    checked={state.reducedMotion}
+                    onChange={toggleReducedMotion}
+                    className="h-4 w-4 accent-ember"
+                  />
+                </label>
+
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="font-serif">Font size</span>
+                    <span className="font-numeral text-sm text-ember">
+                      {Math.round(state.fontScale * 100)}%
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min={85}
+                    max={135}
+                    step={5}
+                    value={Math.round(state.fontScale * 100)}
+                    onChange={(e) => setFontScale(parseInt(e.target.value, 10) / 100)}
+                    className="w-full accent-ember"
+                  />
+                </div>
+
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="font-serif">Autoplay interval</span>
+                    <span className="font-numeral text-sm text-ember">{state.autoplaySec}s</span>
+                  </div>
+                  <input
+                    type="range"
+                    min={3}
+                    max={30}
+                    value={state.autoplaySec}
+                    onChange={(e) => setAutoplaySec(parseInt(e.target.value, 10))}
+                    className="w-full accent-ember"
+                  />
+                </div>
+
+                <div>
+                  <div className="font-display text-[10px] tracking-[0.3em] uppercase text-ink-black/60 mb-2">
+                    Sign the margin
+                  </div>
+                  <input
+                    type="text"
+                    value={state.signature}
+                    onChange={(e) => setSignature(e.target.value.slice(0, 32))}
+                    placeholder="Your name…"
+                    className="w-full rounded-sm border border-ink-black/20 bg-paper-warm/40 px-3 py-2 font-hand text-lg text-ink-black focus:outline-none focus:ring-2 focus:ring-ember/50"
+                  />
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (window.confirm("Reset all reading progress and preferences?")) {
+                      resetProgress();
+                      setPageIndex(0);
+                      setSettingsOpen(false);
+                    }
+                  }}
+                  className="w-full rounded-sm border border-crimson/60 px-3 py-2 font-display text-[10px] tracking-[0.3em] uppercase text-crimson hover:bg-crimson hover:text-paper transition-colors"
+                >
+                  Reset progress
+                </button>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setSettingsOpen(false)}
+                className="absolute top-3 right-3 font-display text-xs tracking-[0.3em] text-ink-black/70 hover:text-crimson"
+              >
+                CLOSE ✕
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Keyboard shortcut help overlay */}
+      <AnimatePresence>
+        {helpOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 z-50 bg-ink-black/85 backdrop-blur-sm flex items-center justify-center px-6"
+            onClick={() => setHelpOpen(false)}
+          >
+            <motion.div
+              initial={{ y: 20, scale: 0.98, opacity: 0 }}
+              animate={{ y: 0, scale: 1, opacity: 1 }}
+              className="relative max-w-lg w-full paper-surface p-8 rounded-sm text-ink-black"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="font-display text-xs tracking-[0.5em] text-crimson">KEYBOARD</div>
+              <h2 className="mt-1 font-display font-black text-2xl">Shortcuts</h2>
+              <ul className="mt-6 grid grid-cols-2 gap-x-6 gap-y-2 font-serif text-sm">
+                {[
+                  ["→ / ←", "Next / previous page"],
+                  ["Home / End", "First / last page"],
+                  ["Space", "Toggle autoplay"],
+                  ["b", "Save bookmark"],
+                  ["Shift + B", "Jump to bookmark"],
+                  ["t", "Toggle contents"],
+                  ["s", "Open settings"],
+                  ["? / Shift + /", "This help"],
+                  ["+ / -", "Font size"],
+                  ["Esc", "Close overlay"],
+                ].map(([k, d]) => (
+                  <li key={k} className="flex items-baseline gap-3">
+                    <kbd className="font-numeral text-ember bg-paper-warm/60 border border-ink-black/20 px-2 py-0.5 rounded-sm text-xs whitespace-nowrap">
+                      {k}
+                    </kbd>
+                    <span className="text-ink-black/80">{d}</span>
+                  </li>
+                ))}
+              </ul>
+              <button
+                type="button"
+                onClick={() => setHelpOpen(false)}
+                className="absolute top-3 right-3 font-display text-xs tracking-[0.3em] text-ink-black/70 hover:text-crimson"
+              >
+                CLOSE ✕
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <Vignette />
       <GrainOverlay />
 
