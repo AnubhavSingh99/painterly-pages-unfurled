@@ -364,18 +364,25 @@ function ReadPage() {
     setLightbox({ src, alt: opener.dataset.openImageAlt || "Aarvi archive image" });
   }, []);
 
+  const reduce = state.reducedMotion;
+  const turnDuration = reduce ? 0.2 : 0.7;
+
   return (
     <main
       className="fixed inset-0 overflow-hidden bg-ink-black text-paper"
       onTouchStart={onTouchStart}
       onTouchEnd={onTouchEnd}
       onClickCapture={openImage}
+      style={{ ["--reader-font-scale" as string]: state.fontScale }}
     >
       {/* Ambient backdrop */}
       <div
         className="absolute inset-0 -z-10"
         style={{
-          background: "radial-gradient(ellipse at 50% 40%, #241832 0%, #0d1220 55%, #05060b 100%)",
+          background:
+            state.theme === "cream"
+              ? "radial-gradient(ellipse at 50% 40%, #f4e6c4 0%, #dcc79a 55%, #a88a5c 100%)"
+              : "radial-gradient(ellipse at 50% 40%, #241832 0%, #0d1220 55%, #05060b 100%)",
         }}
       />
       <div
