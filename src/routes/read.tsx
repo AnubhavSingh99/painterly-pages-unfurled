@@ -134,13 +134,32 @@ function useBookAudio(soundEnabled: boolean, musicEnabled: boolean, pageIndex: n
 }
 
 function ReadPage() {
-  const { state, hydrated, setSpread, unlock, setSignature, toggleSound, toggleMusic } =
-    useBookState();
+  const {
+    state,
+    hydrated,
+    setSpread,
+    unlock,
+    setSignature,
+    toggleSound,
+    toggleMusic,
+    setTheme,
+    toggleReducedMotion,
+    toggleAutoplay,
+    setAutoplaySec,
+    setBookmark,
+    setFontScale,
+    resetProgress,
+  } = useBookState();
   const isMobile = useIsMobile();
 
   const [tocOpen, setTocOpen] = useState(false);
+  const [tocQuery, setTocQuery] = useState("");
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
   const [lightbox, setLightbox] = useState<{ src: string; alt: string } | null>(null);
   const [direction, setDirection] = useState<1 | -1>(1);
+  const [autoplayProgress, setAutoplayProgress] = useState(0);
+  const [toast, setToast] = useState<string | null>(null);
   const total = SPREADS.length;
   const fragmentLabels = ["Lore", "Visual Bible", "Comic Run"];
   const extrasSpread = useMemo(
@@ -151,6 +170,11 @@ function ReadPage() {
       ),
     [],
   );
+
+  const showToast = useCallback((msg: string) => {
+    setToast(msg);
+    window.setTimeout(() => setToast((t) => (t === msg ? null : t)), 1800);
+  }, []);
 
   // Only start from stored spread once hydrated
   const [pageIndex, setPageIndex] = useState(0);
@@ -172,16 +196,86 @@ function ReadPage() {
   const next = useCallback(() => goto(pageIndex + 1, 1), [pageIndex, goto]);
   const prev = useCallback(() => goto(pageIndex - 1, -1), [pageIndex, goto]);
 
+  // Bookmark helpers
+  const jumpBookmark = useCallback(() => {
+    if (state.bookmark == null) {
+      showToast("No bookmark saved yet");
+      return;
+    }
+    goto(state.bookmark);
+    showToast(`Jumped to page ${state.bookmark + 1}`);
+  }, [state.bookmark, goto, showToast]);
+
+  const saveBookmark = useCallback(() => {
+    setBookmark(pageIndex);
+    showToast(`Bookmarked page ${pageIndex + 1}`);
+  }, [pageIndex, setBookmark, showToast]);
+
   // Keyboard nav
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      const t = e.target as HTMLElement | null;
+      if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.isContentEditable)) return;
       if (e.key === "ArrowRight") next();
       else if (e.key === "ArrowLeft") prev();
-      else if (e.key === "Escape") setTocOpen(false);
+      else if (e.key === "Home") goto(0);
+      else if (e.key === "End") goto(total - 1);
+      else if (e.key === "Escape") {
+        setTocOpen(false);
+        setSettingsOpen(false);
+        setHelpOpen(false);
+        setLightbox(null);
+      } else if (e.key === "?" || (e.shiftKey && e.key === "/")) setHelpOpen((v) => !v);
+      else if (e.key === "t" || e.key === "T") setTocOpen((v) => !v);
+      else if (e.key === "s" || e.key === "S") setSettingsOpen((v) => !v);
+      else if (e.key === "b") saveBookmark();
+      else if (e.key === "B") jumpBookmark();
+      else if (e.key === " ") {
+        e.preventDefault();
+        toggleAutoplay();
+      } else if (e.key === "+" || e.key === "=") setFontScale(state.fontScale + 0.05);
+      else if (e.key === "-" || e.key === "_") setFontScale(state.fontScale - 0.05);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [next, prev]);
+  }, [
+    next,
+    prev,
+    goto,
+    total,
+    saveBookmark,
+    jumpBookmark,
+    toggleAutoplay,
+    setFontScale,
+    state.fontScale,
+  ]);
+
+  // Autoplay: advance every N seconds, with a visible progress bar.
+  useEffect(() => {
+    if (!state.autoplay) {
+      setAutoplayProgress(0);
+      return;
+    }
+    const total = state.autoplaySec * 1000;
+    const start = performance.now();
+    let raf = 0;
+    const tick = (t: number) => {
+      const elapsed = t - start;
+      const p = Math.min(1, elapsed / total);
+      setAutoplayProgress(p);
+      if (p >= 1) {
+        if (pageIndex >= SPREADS.length - 1) {
+          toggleAutoplay();
+        } else {
+          next();
+        }
+        return;
+      }
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [state.autoplay, state.autoplaySec, pageIndex, next, toggleAutoplay]);
 
   // Swipe nav
   const touchStart = useRef<number | null>(null);
@@ -270,18 +364,25 @@ function ReadPage() {
     setLightbox({ src, alt: opener.dataset.openImageAlt || "Aarvi archive image" });
   }, []);
 
+  const reduce = state.reducedMotion;
+  const turnDuration = reduce ? 0.2 : 0.7;
+
   return (
     <main
       className="fixed inset-0 overflow-hidden bg-ink-black text-paper"
       onTouchStart={onTouchStart}
       onTouchEnd={onTouchEnd}
       onClickCapture={openImage}
+      style={{ ["--reader-font-scale" as string]: state.fontScale }}
     >
       {/* Ambient backdrop */}
       <div
         className="absolute inset-0 -z-10"
         style={{
-          background: "radial-gradient(ellipse at 50% 40%, #241832 0%, #0d1220 55%, #05060b 100%)",
+          background:
+            state.theme === "cream"
+              ? "radial-gradient(ellipse at 50% 40%, #f4e6c4 0%, #dcc79a 55%, #a88a5c 100%)"
+              : "radial-gradient(ellipse at 50% 40%, #241832 0%, #0d1220 55%, #05060b 100%)",
         }}
       />
       <div
@@ -336,18 +437,18 @@ function ReadPage() {
                 <motion.div
                   key={pageIndex}
                   custom={direction}
-                  initial={{
-                    rotateY: direction === 1 ? 90 : -90,
-                    x: direction === 1 ? "8%" : "-8%",
-                    opacity: 0,
-                  }}
-                  animate={{ rotateY: 0, x: 0, opacity: 1 }}
-                  exit={{
-                    rotateY: direction === 1 ? -90 : 90,
-                    x: direction === 1 ? "-8%" : "8%",
-                    opacity: 0,
-                  }}
-                  transition={{ duration: 0.7, ease: [0.7, 0, 0.3, 1] }}
+                  initial={
+                    reduce
+                      ? { opacity: 0 }
+                      : { rotateY: direction === 1 ? 90 : -90, x: direction === 1 ? "8%" : "-8%", opacity: 0 }
+                  }
+                  animate={reduce ? { opacity: 1 } : { rotateY: 0, x: 0, opacity: 1 }}
+                  exit={
+                    reduce
+                      ? { opacity: 0 }
+                      : { rotateY: direction === 1 ? -90 : 90, x: direction === 1 ? "-8%" : "8%", opacity: 0 }
+                  }
+                  transition={{ duration: turnDuration, ease: [0.7, 0, 0.3, 1] }}
                   className="absolute inset-0"
                   style={{
                     transformOrigin: direction === 1 ? "left center" : "right center",
@@ -451,7 +552,7 @@ function ReadPage() {
       </nav>
 
       {/* Chrome — top-left TOC / back */}
-      <div className="absolute top-4 left-4 z-40 flex gap-2">
+      <div className="absolute top-4 left-4 z-40 flex flex-wrap gap-2 max-w-[60%]">
         <Link
           to="/"
           className="brass-button rounded-sm px-3 py-2 text-[10px] font-display tracking-[0.3em] uppercase inline-flex items-center gap-2"
@@ -461,20 +562,74 @@ function ReadPage() {
         <BrassButton small onClick={() => setTocOpen(true)}>
           Contents
         </BrassButton>
+        <BrassButton small onClick={saveBookmark} ariaLabel="Save bookmark" title="Save bookmark (b)">
+          ⚑ Save
+        </BrassButton>
+        <BrassButton
+          small
+          onClick={jumpBookmark}
+          ariaLabel="Jump to bookmark"
+          title="Jump to bookmark (Shift+B)"
+        >
+          {state.bookmark != null ? `→ p.${state.bookmark + 1}` : "No mark"}
+        </BrassButton>
       </div>
 
       {/* Chrome — top-right controls */}
-      <div className="absolute right-4 top-14 z-40 flex gap-2 sm:top-4">
+      <div className="absolute right-4 top-14 z-40 flex flex-wrap justify-end gap-2 sm:top-4 max-w-[60%]">
         <BrassButton small onClick={toggleSoundWithAudio} ariaLabel="Toggle sound">
           {state.soundEnabled ? "Sound ●" : "Sound ○"}
         </BrassButton>
         <BrassButton small onClick={toggleMusicWithAudio} ariaLabel="Toggle music">
           {state.musicEnabled ? "Music ●" : "Music ○"}
         </BrassButton>
+        <BrassButton small onClick={toggleAutoplay} ariaLabel="Toggle autoplay" title="Autoplay (space)">
+          {state.autoplay ? "Auto ▶" : "Auto ▷"}
+        </BrassButton>
+        <BrassButton small onClick={() => setSettingsOpen(true)} title="Reader settings (s)">
+          ⚙
+        </BrassButton>
+        <BrassButton small onClick={() => setHelpOpen(true)} title="Keyboard shortcuts (?)">
+          ?
+        </BrassButton>
         <BrassButton small onClick={fullscreen} ariaLabel="Fullscreen">
           ⛶
         </BrassButton>
       </div>
+
+      {/* Autoplay progress bar (top of screen) */}
+      {state.autoplay && (
+        <div className="absolute left-0 right-0 top-0 z-40 h-0.5 bg-paper/10">
+          <div
+            className="h-full bg-ember transition-[width] duration-100 ease-linear"
+            style={{
+              width: `${Math.round(autoplayProgress * 100)}%`,
+              boxShadow: "0 0 8px var(--color-ember)",
+            }}
+          />
+        </div>
+      )}
+
+      {/* Signature margin — visible once signed */}
+      {state.signature && (
+        <div className="pointer-events-none absolute bottom-24 left-4 z-40 font-hand text-xl text-gold/80 rotate-[-4deg]">
+          — signed by {state.signature}
+        </div>
+      )}
+
+      {/* Toast */}
+      <AnimatePresence>
+        {toast && (
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 8 }}
+            className="absolute top-4 left-1/2 -translate-x-1/2 z-50 rounded-sm bg-ink-navy/95 border border-gold/40 px-4 py-2 font-display text-[10px] tracking-[0.3em] uppercase text-paper shadow-lg"
+          >
+            {toast}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Chrome — bottom: progress + indicator */}
       <div className="absolute bottom-4 left-0 right-0 z-40 flex flex-col items-center gap-2 px-6">
@@ -554,28 +709,228 @@ function ReadPage() {
               <h2 className="mt-1 font-display font-black text-ink-black text-2xl md:text-4xl">
                 Where do you want to go?
               </h2>
-              <div className="mt-6 space-y-1 max-h-[60vh] overflow-auto pr-2">
-                {SPREADS.map((s, i) => (
-                  <button
-                    key={s.id}
-                    type="button"
-                    onClick={() => {
-                      goto(i);
-                      setTocOpen(false);
-                    }}
-                    className={`w-full text-left px-3 py-2 flex items-baseline gap-3 rounded-sm hover:bg-ember/10 ${
-                      i === pageIndex ? "bg-ember/15" : ""
-                    }`}
-                  >
-                    <span className="font-numeral text-lg text-ember w-10 shrink-0">{i + 1}</span>
-                    <span className="font-serif text-ink-black text-base flex-1">{s.title}</span>
-                    <span className="font-hand text-sm text-ink-black/60">{s.chapterTitle}</span>
-                  </button>
-                ))}
+              <input
+                type="text"
+                value={tocQuery}
+                onChange={(e) => setTocQuery(e.target.value)}
+                placeholder="Search chapters and pages…"
+                className="mt-4 w-full rounded-sm border border-ink-black/20 bg-paper-warm/40 px-3 py-2 font-serif text-ink-black placeholder:text-ink-black/40 focus:outline-none focus:ring-2 focus:ring-ember/50"
+                autoFocus
+              />
+              <div className="mt-4 space-y-1 max-h-[54vh] overflow-auto pr-2">
+                {SPREADS.map((s, i) => {
+                  const q = tocQuery.trim().toLowerCase();
+                  if (q && !`${s.title} ${s.chapterTitle}`.toLowerCase().includes(q)) return null;
+                  const visited = state.visited.includes(i);
+                  const isBookmark = state.bookmark === i;
+                  return (
+                    <button
+                      key={s.id}
+                      type="button"
+                      onClick={() => {
+                        goto(i);
+                        setTocOpen(false);
+                      }}
+                      className={`w-full text-left px-3 py-2 flex items-baseline gap-3 rounded-sm hover:bg-ember/10 ${
+                        i === pageIndex ? "bg-ember/15" : ""
+                      }`}
+                    >
+                      <span className="font-numeral text-lg text-ember w-10 shrink-0">{i + 1}</span>
+                      <span className="font-serif text-ink-black text-base flex-1">
+                        {s.title}
+                        {isBookmark && <span className="ml-2 text-crimson">⚑</span>}
+                      </span>
+                      <span className="font-hand text-sm text-ink-black/60">{s.chapterTitle}</span>
+                      <span
+                        className={`h-2 w-2 rounded-full ${visited ? "bg-ember/80" : "bg-ink-black/15"}`}
+                        title={visited ? "Visited" : "Unvisited"}
+                      />
+                    </button>
+                  );
+                })}
+              </div>
+              <div className="mt-4 text-[10px] font-display tracking-[0.3em] uppercase text-ink-black/50">
+                {state.visited.length} / {total} pages visited
               </div>
               <button
                 type="button"
                 onClick={() => setTocOpen(false)}
+                className="absolute top-3 right-3 font-display text-xs tracking-[0.3em] text-ink-black/70 hover:text-crimson"
+              >
+                CLOSE ✕
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Settings overlay */}
+      <AnimatePresence>
+        {settingsOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 z-50 bg-ink-black/85 backdrop-blur-sm flex items-center justify-center px-6"
+            onClick={() => setSettingsOpen(false)}
+          >
+            <motion.div
+              initial={{ y: 20, scale: 0.98, opacity: 0 }}
+              animate={{ y: 0, scale: 1, opacity: 1 }}
+              className="relative max-w-md w-full paper-surface p-8 rounded-sm text-ink-black"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="font-display text-xs tracking-[0.5em] text-crimson">READER SETTINGS</div>
+              <h2 className="mt-1 font-display font-black text-2xl">Adjust your reading</h2>
+
+              <div className="mt-6 space-y-5">
+                <div>
+                  <div className="font-display text-[10px] tracking-[0.3em] uppercase text-ink-black/60 mb-2">
+                    Parchment
+                  </div>
+                  <div className="flex gap-2">
+                    {(["dark", "cream"] as const).map((t) => (
+                      <button
+                        key={t}
+                        type="button"
+                        onClick={() => setTheme(t)}
+                        className={`flex-1 rounded-sm px-3 py-2 font-serif text-sm border ${
+                          state.theme === t
+                            ? "bg-ember text-paper border-ember"
+                            : "bg-paper-warm/40 border-ink-black/20"
+                        }`}
+                      >
+                        {t === "dark" ? "Midnight" : "Aged cream"}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <label className="flex items-center justify-between">
+                  <span className="font-serif">Reduced motion</span>
+                  <input
+                    type="checkbox"
+                    checked={state.reducedMotion}
+                    onChange={toggleReducedMotion}
+                    className="h-4 w-4 accent-ember"
+                  />
+                </label>
+
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="font-serif">Font size</span>
+                    <span className="font-numeral text-sm text-ember">
+                      {Math.round(state.fontScale * 100)}%
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min={85}
+                    max={135}
+                    step={5}
+                    value={Math.round(state.fontScale * 100)}
+                    onChange={(e) => setFontScale(parseInt(e.target.value, 10) / 100)}
+                    className="w-full accent-ember"
+                  />
+                </div>
+
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="font-serif">Autoplay interval</span>
+                    <span className="font-numeral text-sm text-ember">{state.autoplaySec}s</span>
+                  </div>
+                  <input
+                    type="range"
+                    min={3}
+                    max={30}
+                    value={state.autoplaySec}
+                    onChange={(e) => setAutoplaySec(parseInt(e.target.value, 10))}
+                    className="w-full accent-ember"
+                  />
+                </div>
+
+                <div>
+                  <div className="font-display text-[10px] tracking-[0.3em] uppercase text-ink-black/60 mb-2">
+                    Sign the margin
+                  </div>
+                  <input
+                    type="text"
+                    value={state.signature}
+                    onChange={(e) => setSignature(e.target.value.slice(0, 32))}
+                    placeholder="Your name…"
+                    className="w-full rounded-sm border border-ink-black/20 bg-paper-warm/40 px-3 py-2 font-hand text-lg text-ink-black focus:outline-none focus:ring-2 focus:ring-ember/50"
+                  />
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (window.confirm("Reset all reading progress and preferences?")) {
+                      resetProgress();
+                      setPageIndex(0);
+                      setSettingsOpen(false);
+                    }
+                  }}
+                  className="w-full rounded-sm border border-crimson/60 px-3 py-2 font-display text-[10px] tracking-[0.3em] uppercase text-crimson hover:bg-crimson hover:text-paper transition-colors"
+                >
+                  Reset progress
+                </button>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setSettingsOpen(false)}
+                className="absolute top-3 right-3 font-display text-xs tracking-[0.3em] text-ink-black/70 hover:text-crimson"
+              >
+                CLOSE ✕
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Keyboard shortcut help overlay */}
+      <AnimatePresence>
+        {helpOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 z-50 bg-ink-black/85 backdrop-blur-sm flex items-center justify-center px-6"
+            onClick={() => setHelpOpen(false)}
+          >
+            <motion.div
+              initial={{ y: 20, scale: 0.98, opacity: 0 }}
+              animate={{ y: 0, scale: 1, opacity: 1 }}
+              className="relative max-w-lg w-full paper-surface p-8 rounded-sm text-ink-black"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="font-display text-xs tracking-[0.5em] text-crimson">KEYBOARD</div>
+              <h2 className="mt-1 font-display font-black text-2xl">Shortcuts</h2>
+              <ul className="mt-6 grid grid-cols-2 gap-x-6 gap-y-2 font-serif text-sm">
+                {[
+                  ["→ / ←", "Next / previous page"],
+                  ["Home / End", "First / last page"],
+                  ["Space", "Toggle autoplay"],
+                  ["b", "Save bookmark"],
+                  ["Shift + B", "Jump to bookmark"],
+                  ["t", "Toggle contents"],
+                  ["s", "Open settings"],
+                  ["? / Shift + /", "This help"],
+                  ["+ / -", "Font size"],
+                  ["Esc", "Close overlay"],
+                ].map(([k, d]) => (
+                  <li key={k} className="flex items-baseline gap-3">
+                    <kbd className="font-numeral text-ember bg-paper-warm/60 border border-ink-black/20 px-2 py-0.5 rounded-sm text-xs whitespace-nowrap">
+                      {k}
+                    </kbd>
+                    <span className="text-ink-black/80">{d}</span>
+                  </li>
+                ))}
+              </ul>
+              <button
+                type="button"
+                onClick={() => setHelpOpen(false)}
                 className="absolute top-3 right-3 font-display text-xs tracking-[0.3em] text-ink-black/70 hover:text-crimson"
               >
                 CLOSE ✕
