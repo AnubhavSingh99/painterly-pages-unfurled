@@ -2,12 +2,21 @@ import { useEffect, useState, useCallback } from "react";
 
 const KEY = "aarvi-margins:v2";
 
+export type BookTheme = "dark" | "cream";
+
 export type BookState = {
   currentSpread: number;
-  unlockedFragments: boolean[]; // 3 slots
+  unlockedFragments: boolean[];
   signature: string;
   soundEnabled: boolean;
   musicEnabled: boolean;
+  theme: BookTheme;
+  reducedMotion: boolean;
+  autoplay: boolean;
+  autoplaySec: number;
+  bookmark: number | null;
+  fontScale: number;
+  visited: number[];
 };
 
 const defaultState: BookState = {
@@ -16,6 +25,13 @@ const defaultState: BookState = {
   signature: "",
   soundEnabled: false,
   musicEnabled: false,
+  theme: "dark",
+  reducedMotion: false,
+  autoplay: false,
+  autoplaySec: 8,
+  bookmark: null,
+  fontScale: 1,
+  visited: [],
 };
 
 function load(): BookState {
@@ -39,7 +55,6 @@ function save(s: BookState) {
 }
 
 export function useBookState() {
-  // SSR-safe: initialize with default, hydrate from localStorage after mount.
   const [state, setState] = useState<BookState>(defaultState);
   const [hydrated, setHydrated] = useState(false);
 
@@ -53,7 +68,11 @@ export function useBookState() {
   }, [state, hydrated]);
 
   const setSpread = useCallback((n: number) => {
-    setState((s) => ({ ...s, currentSpread: n }));
+    setState((s) => ({
+      ...s,
+      currentSpread: n,
+      visited: s.visited.includes(n) ? s.visited : [...s.visited, n],
+    }));
   }, []);
   const unlock = useCallback((idx: number) => {
     setState((s) => {
@@ -72,8 +91,44 @@ export function useBookState() {
   const toggleMusic = useCallback(() => {
     setState((s) => ({ ...s, musicEnabled: !s.musicEnabled }));
   }, []);
+  const setTheme = useCallback((t: BookTheme) => {
+    setState((s) => ({ ...s, theme: t }));
+  }, []);
+  const toggleReducedMotion = useCallback(() => {
+    setState((s) => ({ ...s, reducedMotion: !s.reducedMotion }));
+  }, []);
+  const toggleAutoplay = useCallback(() => {
+    setState((s) => ({ ...s, autoplay: !s.autoplay }));
+  }, []);
+  const setAutoplaySec = useCallback((n: number) => {
+    setState((s) => ({ ...s, autoplaySec: Math.max(3, Math.min(30, n)) }));
+  }, []);
+  const setBookmark = useCallback((n: number | null) => {
+    setState((s) => ({ ...s, bookmark: n }));
+  }, []);
+  const setFontScale = useCallback((n: number) => {
+    setState((s) => ({ ...s, fontScale: Math.max(0.85, Math.min(1.35, n)) }));
+  }, []);
+  const resetProgress = useCallback(() => {
+    setState({ ...defaultState });
+  }, []);
 
-  return { state, hydrated, setSpread, unlock, setSignature, toggleSound, toggleMusic };
+  return {
+    state,
+    hydrated,
+    setSpread,
+    unlock,
+    setSignature,
+    toggleSound,
+    toggleMusic,
+    setTheme,
+    toggleReducedMotion,
+    toggleAutoplay,
+    setAutoplaySec,
+    setBookmark,
+    setFontScale,
+    resetProgress,
+  };
 }
 
 export type SpreadMeta = {
