@@ -3,10 +3,14 @@ import { useState } from "react";
 import deskBook from "@/assets/aarvi/first-character.png";
 import {
   DustField,
+  GildedDivider,
   GrainOverlay,
+  InkSplatter,
   ParallaxLayer,
   ParallaxScene,
   Vignette,
+  WatercolorBlooms,
+  WaxSeal,
 } from "@/components/atoms";
 
 export const Route = createFileRoute("/")({
