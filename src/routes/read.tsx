@@ -134,13 +134,32 @@ function useBookAudio(soundEnabled: boolean, musicEnabled: boolean, pageIndex: n
 }
 
 function ReadPage() {
-  const { state, hydrated, setSpread, unlock, setSignature, toggleSound, toggleMusic } =
-    useBookState();
+  const {
+    state,
+    hydrated,
+    setSpread,
+    unlock,
+    setSignature,
+    toggleSound,
+    toggleMusic,
+    setTheme,
+    toggleReducedMotion,
+    toggleAutoplay,
+    setAutoplaySec,
+    setBookmark,
+    setFontScale,
+    resetProgress,
+  } = useBookState();
   const isMobile = useIsMobile();
 
   const [tocOpen, setTocOpen] = useState(false);
+  const [tocQuery, setTocQuery] = useState("");
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
   const [lightbox, setLightbox] = useState<{ src: string; alt: string } | null>(null);
   const [direction, setDirection] = useState<1 | -1>(1);
+  const [autoplayProgress, setAutoplayProgress] = useState(0);
+  const [toast, setToast] = useState<string | null>(null);
   const total = SPREADS.length;
   const fragmentLabels = ["Lore", "Visual Bible", "Comic Run"];
   const extrasSpread = useMemo(
@@ -151,6 +170,11 @@ function ReadPage() {
       ),
     [],
   );
+
+  const showToast = useCallback((msg: string) => {
+    setToast(msg);
+    window.setTimeout(() => setToast((t) => (t === msg ? null : t)), 1800);
+  }, []);
 
   // Only start from stored spread once hydrated
   const [pageIndex, setPageIndex] = useState(0);
