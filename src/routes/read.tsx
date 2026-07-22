@@ -437,18 +437,18 @@ function ReadPage() {
                 <motion.div
                   key={pageIndex}
                   custom={direction}
-                  initial={{
-                    rotateY: direction === 1 ? 90 : -90,
-                    x: direction === 1 ? "8%" : "-8%",
-                    opacity: 0,
-                  }}
-                  animate={{ rotateY: 0, x: 0, opacity: 1 }}
-                  exit={{
-                    rotateY: direction === 1 ? -90 : 90,
-                    x: direction === 1 ? "-8%" : "8%",
-                    opacity: 0,
-                  }}
-                  transition={{ duration: 0.7, ease: [0.7, 0, 0.3, 1] }}
+                  initial={
+                    reduce
+                      ? { opacity: 0 }
+                      : { rotateY: direction === 1 ? 90 : -90, x: direction === 1 ? "8%" : "-8%", opacity: 0 }
+                  }
+                  animate={reduce ? { opacity: 1 } : { rotateY: 0, x: 0, opacity: 1 }}
+                  exit={
+                    reduce
+                      ? { opacity: 0 }
+                      : { rotateY: direction === 1 ? -90 : 90, x: direction === 1 ? "-8%" : "8%", opacity: 0 }
+                  }
+                  transition={{ duration: turnDuration, ease: [0.7, 0, 0.3, 1] }}
                   className="absolute inset-0"
                   style={{
                     transformOrigin: direction === 1 ? "left center" : "right center",
