@@ -342,12 +342,13 @@ function TitleSpread() {
 
 function TocSpread({ onJump }: { onJump: (n: number) => void }) {
   const chapters = [
-    { n: "I", title: "Style and Mascot Creation", spread: 3 },
-    { n: "II", title: "Character Bible", spread: 5 },
-    { n: "III", title: "Visual Development", spread: 7 },
-    { n: "IV", title: "Lore and Alternate Worlds", spread: 9 },
-    { n: "V", title: "Comic Pages", spread: 14 },
-    { n: "--", title: "Downloads and Credits", spread: 32 },
+    { n: "--", title: "Creation Timeline", spread: 3 },
+    { n: "I", title: "Style and Mascot Creation", spread: 4 },
+    { n: "II", title: "Character Bible", spread: 6 },
+    { n: "III", title: "Visual Development", spread: 9 },
+    { n: "IV", title: "Lore and Alternate Worlds", spread: 11 },
+    { n: "V", title: "Comic Pages", spread: 17 },
+    { n: "--", title: "Gallery, Downloads, Secret Ending", spread: 36 },
   ];
 
   return (
@@ -376,6 +377,50 @@ function TocSpread({ onJump }: { onJump: (n: number) => void }) {
         </div>
         <div className="mt-10 max-w-md font-hand text-lg text-teal">
           "I draw the life I want until I can finally live it."
+        </div>
+      </div>
+    </Page>
+  );
+}
+
+function CreationTimelineSpread({ onJump }: { onJump: (n: number) => void }) {
+  const milestones = [
+    ["01", "Style Language", "dark cyber-goth anime, expressive eyes, gothic softness", 4],
+    ["02", "Personal Mascot", "glasses, sketchbook, petite silhouette, artist props", 6],
+    ["03", "Visual Bible", "face, hair, hands, outfit construction, symbolic details", 9],
+    ["04", "Lore", "wrong classroom, inner world, NYC, self-authorship", 11],
+    ["05", "Comics", "anime, webtoon, and game-style story runs", 17],
+    ["06", "Archive", "gallery wall, downloads, and the final hidden page", 36],
+  ];
+
+  return (
+    <Page tone="paper" className="bg-paper-warm">
+      <div className="absolute inset-0 opacity-20">
+        <ImagePanel src={journey} alt="Aarvi creation journey" fit="cover" />
+      </div>
+      <div className="absolute inset-0 bg-paper/84" />
+      <div className="pointer-events-none absolute left-8 right-8 top-1/2 h-px bg-ink-black/20 max-md:hidden" />
+      <div className="relative z-10 flex h-full flex-col justify-center p-6 md:p-10">
+        <ArchiveLabel eyebrow="Opening Ritual" title="How Aarvi Was Made">
+          The archive is not arranged like a folder. It is arranged like a trail of evidence: every
+          test, board, page, and symbol shows how the character slowly learned her own name.
+        </ArchiveLabel>
+        <div className="mt-8 grid gap-3 md:grid-cols-6">
+          {milestones.map(([n, title, note, spread]) => (
+            <button
+              key={n}
+              type="button"
+              onClick={() => onJump(Number(spread))}
+              className="group relative min-h-32 border border-ink-black/10 bg-paper/82 p-4 text-left shadow-xl transition-transform hover:-translate-y-1"
+            >
+              <div className="font-numeral text-3xl text-ember">{n}</div>
+              <div className="mt-2 font-display text-[10px] uppercase tracking-[0.25em] text-crimson">
+                {title}
+              </div>
+              <div className="mt-2 font-hand text-lg leading-tight text-teal">{note}</div>
+              <div className="absolute -right-1 -top-1 h-5 w-5 rotate-12 bg-gold/70 shadow-md" />
+            </button>
+          ))}
         </div>
       </div>
     </Page>
@@ -438,6 +483,54 @@ function LoreSpread({ onUnlock }: { onUnlock: (i: number) => void }) {
               </div>
             </div>
           ))}
+        </div>
+      </div>
+    </Page>
+  );
+}
+
+function OfficialProfileSpread() {
+  const stats = [
+    ["Role", "Artist / Inkmage"],
+    ["Real World", "Engineering student"],
+    ["Dream", "NYC studio, comics, anime, games"],
+    ["Element", "Ink and imagination"],
+    ["Core Truth", "Choosing herself is authorship"],
+  ];
+
+  return (
+    <Page
+      tone="dark"
+      className="!bg-ink-black"
+      openImage={{ src: firstCharacter, alt: "Aarvi official profile" }}
+    >
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_68%_30%,rgba(31,139,142,0.2),transparent_30%),linear-gradient(90deg,#05060b,rgba(5,6,11,0.86),rgba(5,6,11,0.45))]" />
+      <ImagePanel
+        src={firstCharacter}
+        alt="Aarvi official profile art"
+        fit="contain"
+        className="absolute right-[3%] top-[5%] h-[90%] w-[52%] opacity-95 max-md:opacity-35"
+      />
+      <div className="relative z-10 flex h-full max-w-xl flex-col justify-center p-7 md:p-12">
+        <ArchiveLabel eyebrow="Official Character Card" title="Aarvi" light>
+          A quiet artist disguised as a practical student. She carries her sketchbook like a private
+          door, and every drawing becomes a rehearsal for freedom.
+        </ArchiveLabel>
+        <div className="mt-7 grid gap-3">
+          {stats.map(([label, value]) => (
+            <div
+              key={label}
+              className="grid grid-cols-[0.38fr_1fr] gap-3 border-b border-paper/15 pb-2"
+            >
+              <div className="font-display text-[10px] uppercase tracking-[0.28em] text-crimson">
+                {label}
+              </div>
+              <div className="font-serif text-sm text-paper/84 md:text-base">{value}</div>
+            </div>
+          ))}
+        </div>
+        <div className="mt-7 border-l-4 border-gold bg-paper/10 p-4 font-hand text-2xl leading-tight text-gold">
+          "I draw the life I want until I can finally live it."
         </div>
       </div>
     </Page>
@@ -577,6 +670,50 @@ function LoreSymbolsSpread() {
   );
 }
 
+function ComicIndexSpread({ onJump }: { onJump: (n: number) => void }) {
+  const modes = [
+    ["Anime Run", "five cinematic pages", animeOne, 18],
+    ["Webtoon Run", "vertical emotional panels", webtoonOne, 24],
+    ["Game Run", "ink-powered chapter cards", gameOne, 31],
+  ] as const;
+
+  return (
+    <Page tone="dark" className="!bg-ink-black">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_20%,rgba(184,137,47,0.18),transparent_34%),linear-gradient(180deg,#05060b,#11111c)]" />
+      <div className="relative z-10 flex h-full flex-col justify-center p-6 md:p-10">
+        <ArchiveLabel eyebrow="Comic Reader" title="Choose the Story Form" light>
+          The same ache becomes three different reading experiences: anime pacing, webtoon intimacy,
+          and game-style myth.
+        </ArchiveLabel>
+        <div className="mt-8 grid min-h-0 gap-4 md:grid-cols-3">
+          {modes.map(([title, note, image, spread]) => (
+            <button
+              key={title}
+              type="button"
+              onClick={() => onJump(spread)}
+              className="group relative min-h-0 overflow-hidden border border-gold/20 bg-ink-black p-2 text-left shadow-2xl"
+            >
+              <ImagePanel
+                src={image}
+                alt={title}
+                fit="cover"
+                className="opacity-70 transition-transform duration-700 group-hover:scale-105"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-ink-black via-ink-black/20 to-transparent" />
+              <div className="absolute bottom-4 left-4 right-4">
+                <div className="font-display text-[10px] uppercase tracking-[0.3em] text-gold">
+                  {title}
+                </div>
+                <div className="mt-1 font-hand text-xl text-paper">{note}</div>
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
+    </Page>
+  );
+}
+
 function ComicPage({ plate, index, mode }: { plate: Plate; index: number; mode: string }) {
   return (
     <Page tone="dark" className="!bg-ink-black" openImage={{ src: plate.src, alt: plate.title }}>
@@ -601,6 +738,55 @@ function ComicPage({ plate, index, mode }: { plate: Plate; index: number; mode: 
         >
           <ImagePanel src={plate.src} alt={plate.title} fit="contain" />
         </figure>
+      </div>
+    </Page>
+  );
+}
+
+function GameProfileSpread({ onJump }: { onJump: (n: number) => void }) {
+  const abilities = [
+    ["Passive", "Margin Sense", "Sees paths others miss; reveals hidden routes in pressure."],
+    ["Skill", "Ink Veil", "Drops a wash of living ink that softens incoming noise."],
+    ["Skill", "Panel Cut", "Draws a frame and steps through it before fear can catch up."],
+    ["Ultimate", "Masterpiece", "Turns the whole battlefield into the world she kept sketching."],
+  ];
+
+  return (
+    <Page
+      tone="dark"
+      className="!bg-ink-black"
+      openImage={{ src: gameFive, alt: "Aarvi game profile" }}
+    >
+      <ImagePanel src={gameFive} alt="Aarvi game identity" fit="cover" className="opacity-45" />
+      <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(5,6,11,0.95),rgba(5,6,11,0.65),rgba(5,6,11,0.9))]" />
+      <div className="relative z-10 grid h-full gap-5 p-6 md:grid-cols-[0.8fr_1.2fr] md:p-10">
+        <div className="flex flex-col justify-center">
+          <ArchiveLabel eyebrow="Playable Identity" title="Aarvi, The Inkmage" light>
+            Role: Controller / Duelist. Element: Ink and Imagination. Weapon: a magical sketchbook
+            and pen. She does not overpower the room; she redraws its rules.
+          </ArchiveLabel>
+          <button
+            type="button"
+            onClick={() => onJump(31)}
+            className="mt-7 w-fit border border-gold/40 bg-gold/85 px-4 py-2 font-display text-[10px] uppercase tracking-[0.3em] text-ink-black shadow-lg"
+          >
+            Read Game Comic
+          </button>
+        </div>
+        <div className="grid content-center gap-3">
+          {abilities.map(([type, name, text]) => (
+            <div
+              key={name}
+              className="border border-gold/20 bg-paper/10 p-4 shadow-xl backdrop-blur-sm"
+            >
+              <div className="font-display text-[9px] uppercase tracking-[0.32em] text-crimson">
+                {type}
+              </div>
+              <div className="mt-1 font-serif text-xl font-semibold text-paper">{name}</div>
+              <div className="mt-1 font-hand text-lg leading-tight text-gold">{text}</div>
+            </div>
+          ))}
+        </div>
       </div>
     </Page>
   );
@@ -659,6 +845,79 @@ function DownloadsSpread({ unlocked }: { unlocked: boolean[] }) {
               </div>
             </div>
           ))}
+        </div>
+      </div>
+    </Page>
+  );
+}
+
+function GalleryWallSpread() {
+  const plates: Plate[] = [
+    { src: firstCharacter, title: "First Character", note: "first personalized pass" },
+    { src: mascotSheet, title: "Mascot Sheet", note: "artist identity" },
+    { src: expressions, title: "Expressions", note: "mood language", landscape: true },
+    { src: profileSheet, title: "Profile Sheet", note: "final profile", landscape: true },
+    { src: silhouetteExploration, title: "Silhouettes", note: "shape search", landscape: true },
+    { src: handStudies, title: "Hands", note: "gesture studies", landscape: true },
+    { src: studio, title: "Studio", note: "future room", landscape: true },
+    { src: animeOne, title: "Anime Page", note: "first comic page" },
+    { src: webtoonOne, title: "Webtoon Page", note: "vertical version" },
+    { src: gameFive, title: "Masterpiece", note: "game finale", landscape: true },
+  ];
+
+  return (
+    <Page tone="paper" className="bg-paper-warm">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_10%,rgba(184,137,47,0.24),transparent_28%),radial-gradient(circle_at_80%_90%,rgba(31,139,142,0.15),transparent_30%)]" />
+      <div className="relative z-10 grid h-full grid-cols-2 gap-2 p-4 md:grid-cols-5 md:p-7">
+        {plates.map((plate, index) => (
+          <FramedPlate
+            key={`${plate.title}-${index}`}
+            plate={plate}
+            index={index}
+            className={`${index % 3 === 0 ? "rotate-[-1.5deg]" : index % 3 === 1 ? "rotate-[1deg]" : "rotate-[-0.5deg]"} min-h-0`}
+          />
+        ))}
+      </div>
+      <div className="absolute left-5 top-5 z-20 bg-ink-black/80 px-4 py-2 font-display text-[10px] uppercase tracking-[0.35em] text-paper shadow-xl">
+        Gallery Wall
+      </div>
+    </Page>
+  );
+}
+
+function SecretEndingSpread({ unlocked }: { unlocked: boolean[] }) {
+  const complete = unlocked.every(Boolean);
+
+  return (
+    <Page
+      tone="dark"
+      className="!bg-ink-black"
+      openImage={{ src: artistJourney, alt: "Aarvi secret ending" }}
+    >
+      <ImagePanel
+        src={artistJourney}
+        alt="Aarvi secret ending"
+        fit="cover"
+        className="opacity-55"
+      />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_35%,rgba(184,137,47,0.22),transparent_30%),linear-gradient(180deg,rgba(5,6,11,0.55),#05060b)]" />
+      <DustField count={28} />
+      <div className="relative z-10 flex h-full flex-col items-center justify-center px-8 text-center">
+        <div className="font-display text-[10px] uppercase tracking-[0.5em] text-gold">
+          {complete ? "Unlocked Ending" : "Locked Ending"}
+        </div>
+        <h2 className="mt-3 max-w-3xl font-display text-4xl font-black leading-none text-paper md:text-6xl">
+          {complete ? "One Day, I Will Live There" : "Three Keys Remain"}
+        </h2>
+        <p className="mt-6 max-w-xl font-serif text-base italic leading-relaxed text-paper/82">
+          {complete
+            ? "Lore, visual bible, and comic run have all been witnessed. The final page no longer feels like escape. It feels like a door."
+            : "Visit the Lore, Visual Bible, and Comic Run sections. When all three marks glow, this page becomes Aarvi's private ending."}
+        </p>
+        <div className="mt-8 font-hand text-3xl leading-tight text-gold">
+          {complete
+            ? "One day, I'll live inside the world I keep sketching."
+            : "The sketchbook is waiting for the rest of the map."}
         </div>
       </div>
     </Page>
@@ -786,6 +1045,8 @@ export function renderSpread(
       return <TitleSpread />;
     case "toc":
       return <TocSpread onJump={ctx.onJump} />;
+    case "creation-timeline":
+      return <CreationTimelineSpread onJump={ctx.onJump} />;
     case "style-tests":
       return (
         <PlateSpread
@@ -850,6 +1111,8 @@ export function renderSpread(
           ]}
         />
       );
+    case "official-profile":
+      return <OfficialProfileSpread />;
     case "wardrobe":
       return (
         <PlateSpread
@@ -966,6 +1229,8 @@ export function renderSpread(
       return <LoreProfileSpread />;
     case "lore-symbols":
       return <LoreSymbolsSpread />;
+    case "comic-index":
+      return <ComicIndexSpread onJump={ctx.onJump} />;
     case "anime-divider":
       return (
         <SectionDivider
@@ -993,6 +1258,8 @@ export function renderSpread(
           image={gameOne}
         />
       );
+    case "game-profile":
+      return <GameProfileSpread onJump={ctx.onJump} />;
     case "final-archive":
       return (
         <PlateSpread
@@ -1014,8 +1281,12 @@ export function renderSpread(
           ]}
         />
       );
+    case "gallery-wall":
+      return <GalleryWallSpread />;
     case "downloads":
       return <DownloadsSpread unlocked={ctx.unlocked} />;
+    case "secret-ending":
+      return <SecretEndingSpread unlocked={ctx.unlocked} />;
     case "credits":
       return <CreditsSpread />;
     default:

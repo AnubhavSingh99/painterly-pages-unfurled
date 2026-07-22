@@ -87,6 +87,7 @@ export const SPREADS: SpreadMeta[] = [
   { id: "cover", chapter: 0, chapterTitle: "Front", title: "Cover" },
   { id: "title", chapter: 0, chapterTitle: "Front", title: "Title Page" },
   { id: "toc", chapter: 0, chapterTitle: "Front", title: "Contents" },
+  { id: "creation-timeline", chapter: 0, chapterTitle: "Front", title: "Creation Timeline" },
   {
     id: "style-tests",
     chapter: 1,
@@ -104,6 +105,12 @@ export const SPREADS: SpreadMeta[] = [
     chapter: 2,
     chapterTitle: "II · Character Bible",
     title: "Character Bible",
+  },
+  {
+    id: "official-profile",
+    chapter: 2,
+    chapterTitle: "II · Character Bible",
+    title: "Official Profile",
   },
   {
     id: "wardrobe",
@@ -153,6 +160,7 @@ export const SPREADS: SpreadMeta[] = [
     chapterTitle: "IV · Lore and Alternate Worlds",
     title: "A Girl Carrying Two Worlds",
   },
+  { id: "comic-index", chapter: 5, chapterTitle: "V · Comic Pages", title: "Comic Reader" },
   { id: "anime-divider", chapter: 5, chapterTitle: "V · Comic Pages", title: "Anime Comic" },
   { id: "anime-1", chapter: 5, chapterTitle: "V · Comic Pages", title: "Anime 1" },
   { id: "anime-2", chapter: 5, chapterTitle: "V · Comic Pages", title: "Anime 2" },
@@ -166,20 +174,23 @@ export const SPREADS: SpreadMeta[] = [
   { id: "webtoon-4", chapter: 5, chapterTitle: "V · Comic Pages", title: "Webtoon 4" },
   { id: "webtoon-5", chapter: 5, chapterTitle: "V · Comic Pages", title: "Webtoon 5" },
   { id: "game-divider", chapter: 5, chapterTitle: "V · Comic Pages", title: "Game-Style Comic" },
+  { id: "game-profile", chapter: 5, chapterTitle: "V · Comic Pages", title: "Game Profile" },
   { id: "game-1", chapter: 5, chapterTitle: "V · Comic Pages", title: "Game 1" },
   { id: "game-2", chapter: 5, chapterTitle: "V · Comic Pages", title: "Game 2" },
   { id: "game-3", chapter: 5, chapterTitle: "V · Comic Pages", title: "Game 3" },
   { id: "game-4", chapter: 5, chapterTitle: "V · Comic Pages", title: "Game 4" },
   { id: "game-5", chapter: 5, chapterTitle: "V · Comic Pages", title: "Game 5" },
   { id: "final-archive", chapter: 6, chapterTitle: "Archive", title: "Final Boards" },
+  { id: "gallery-wall", chapter: 6, chapterTitle: "Archive", title: "Gallery Wall" },
   { id: "downloads", chapter: 6, chapterTitle: "Archive", title: "Downloads" },
+  { id: "secret-ending", chapter: 6, chapterTitle: "Archive", title: "Secret Ending" },
   { id: "credits", chapter: 6, chapterTitle: "Archive", title: "Credits" },
 ];
 
 export const CHAPTERS = [
-  { n: 1, label: "I", title: "Style and Mascot Creation", firstSpread: 3 },
-  { n: 2, label: "II", title: "Character Bible", firstSpread: 5 },
-  { n: 3, label: "III", title: "Visual Development", firstSpread: 7 },
-  { n: 4, label: "IV", title: "Lore and Alternate Worlds", firstSpread: 9 },
-  { n: 5, label: "V", title: "Comic Pages", firstSpread: 14 },
+  { n: 1, label: "I", title: "Style and Mascot Creation", firstSpread: 4 },
+  { n: 2, label: "II", title: "Character Bible", firstSpread: 6 },
+  { n: 3, label: "III", title: "Visual Development", firstSpread: 9 },
+  { n: 4, label: "IV", title: "Lore and Alternate Worlds", firstSpread: 11 },
+  { n: 5, label: "V", title: "Comic Pages", firstSpread: 17 },
 ];

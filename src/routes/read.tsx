@@ -206,6 +206,7 @@ function ReadPage() {
     else if (
       [
         "identity",
+        "official-profile",
         "wardrobe",
         "visual-development-one",
         "visual-development-two",
@@ -213,11 +214,7 @@ function ReadPage() {
       ].includes(meta.id)
     ) {
       unlock(1);
-    } else if (
-      /^anime-\d+$/.test(meta.id) ||
-      /^webtoon-\d+$/.test(meta.id) ||
-      /^game-\d+$/.test(meta.id)
-    ) {
+    } else if (meta.chapter === 5) {
       unlock(2);
     }
   }, [hydrated, meta, unlock]);
