@@ -257,3 +257,127 @@
     transition-duration: 0.001ms !important;
   }
 }
+
+/* ============================================================
+   Extended painterly styles
+   ============================================================ */
+
+@utility gold-leaf {
+  background: linear-gradient(
+    100deg,
+    #7a5a1e 0%, #b8892f 20%, #f4d580 42%, #fff6c9 50%,
+    #f4d580 58%, #b8892f 80%, #7a5a1e 100%
+  );
+  background-size: 220% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: gold-sweep 6s ease-in-out infinite;
+}
+
+@keyframes gold-sweep {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+@utility ink-splatter {
+  background-image:
+    radial-gradient(circle at 12% 18%, rgba(10,10,15,0.85) 0 1.4px, transparent 2px),
+    radial-gradient(circle at 27% 62%, rgba(10,10,15,0.7) 0 2.6px, transparent 3.4px),
+    radial-gradient(circle at 44% 24%, rgba(10,10,15,0.6) 0 1px, transparent 1.6px),
+    radial-gradient(circle at 58% 71%, rgba(10,10,15,0.8) 0 3.2px, transparent 4px),
+    radial-gradient(circle at 71% 36%, rgba(10,10,15,0.55) 0 1.2px, transparent 1.8px),
+    radial-gradient(circle at 84% 58%, rgba(10,10,15,0.9) 0 2px, transparent 2.6px),
+    radial-gradient(circle at 92% 12%, rgba(10,10,15,0.6) 0 1.4px, transparent 2px);
+  background-repeat: no-repeat;
+}
+
+@utility deckle-edge {
+  -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' preserveAspectRatio='none' viewBox='0 0 600 400'><filter id='r'><feTurbulence baseFrequency='0.02 0.06' numOctaves='2' seed='7'/><feDisplacementMap in='SourceGraphic' scale='14'/></filter><rect x='6' y='6' width='588' height='388' fill='white' filter='url(%23r)'/></svg>");
+  mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' preserveAspectRatio='none' viewBox='0 0 600 400'><filter id='r'><feTurbulence baseFrequency='0.02 0.06' numOctaves='2' seed='7'/><feDisplacementMap in='SourceGraphic' scale='14'/></filter><rect x='6' y='6' width='588' height='388' fill='white' filter='url(%23r)'/></svg>");
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+}
+
+@utility drop-cap {
+  &::first-letter {
+    font-family: var(--font-numeral);
+    float: left;
+    font-size: 4.2em;
+    line-height: 0.85;
+    padding: 0.06em 0.14em 0 0;
+    margin-right: 0.06em;
+    background: linear-gradient(180deg, #f4d580 0%, #b8892f 60%, #7a5a1e 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 22px color-mix(in oklab, var(--color-ember) 55%, transparent);
+  }
+}
+
+@utility wax-seal {
+  width: 68px;
+  height: 68px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-numeral);
+  color: rgba(239, 228, 201, 0.9);
+  background: radial-gradient(circle at 32% 30%, #b23244 0%, #7a1e2a 55%, #46101a 100%);
+  box-shadow:
+    inset 0 2px 6px rgba(255, 200, 200, 0.35),
+    inset 0 -6px 12px rgba(0, 0, 0, 0.55),
+    0 6px 14px rgba(0, 0, 0, 0.55);
+  border: 1px solid rgba(0, 0, 0, 0.55);
+  transform: rotate(-8deg);
+}
+
+@utility candle-glow {
+  box-shadow:
+    0 0 0 1px rgba(184,137,47,0.3),
+    0 0 22px -4px color-mix(in oklab, var(--color-ember) 60%, transparent),
+    0 0 60px -10px color-mix(in oklab, var(--color-ember) 45%, transparent);
+  animation: candle-pulse 3.4s ease-in-out infinite;
+}
+
+@keyframes candle-pulse {
+  0%, 100% { filter: brightness(1); }
+  50% { filter: brightness(1.14); }
+}
+
+@utility parchment-stains {
+  background-image:
+    radial-gradient(ellipse 60px 40px at 12% 22%, rgba(120, 74, 24, 0.18), transparent 70%),
+    radial-gradient(ellipse 90px 60px at 82% 78%, rgba(96, 48, 12, 0.16), transparent 72%),
+    radial-gradient(ellipse 40px 40px at 68% 18%, rgba(80, 40, 10, 0.14), transparent 70%),
+    radial-gradient(ellipse 120px 80px at 32% 88%, rgba(120, 74, 24, 0.12), transparent 72%);
+  background-repeat: no-repeat;
+}
+
+@utility etched-label {
+  font-family: var(--font-display);
+  letter-spacing: 0.5em;
+  text-transform: uppercase;
+  color: color-mix(in oklab, var(--color-gold) 80%, var(--color-paper));
+  text-shadow: 0 1px 0 rgba(0,0,0,0.6), 0 -1px 0 rgba(255,220,150,0.15);
+}
+
+@utility watercolor-bloom {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(28px);
+  mix-blend-mode: multiply;
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+@keyframes slow-drift {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50% { transform: translate3d(6px, -8px, 0); }
+}
+
+@keyframes shimmer-sweep {
+  0% { transform: translateX(-120%) skewX(-20deg); }
+  100% { transform: translateX(220%) skewX(-20deg); }
+}
