@@ -709,24 +709,48 @@ function ReadPage() {
               <h2 className="mt-1 font-display font-black text-ink-black text-2xl md:text-4xl">
                 Where do you want to go?
               </h2>
-              <div className="mt-6 space-y-1 max-h-[60vh] overflow-auto pr-2">
-                {SPREADS.map((s, i) => (
-                  <button
-                    key={s.id}
-                    type="button"
-                    onClick={() => {
-                      goto(i);
-                      setTocOpen(false);
-                    }}
-                    className={`w-full text-left px-3 py-2 flex items-baseline gap-3 rounded-sm hover:bg-ember/10 ${
-                      i === pageIndex ? "bg-ember/15" : ""
-                    }`}
-                  >
-                    <span className="font-numeral text-lg text-ember w-10 shrink-0">{i + 1}</span>
-                    <span className="font-serif text-ink-black text-base flex-1">{s.title}</span>
-                    <span className="font-hand text-sm text-ink-black/60">{s.chapterTitle}</span>
-                  </button>
-                ))}
+              <input
+                type="text"
+                value={tocQuery}
+                onChange={(e) => setTocQuery(e.target.value)}
+                placeholder="Search chapters and pages…"
+                className="mt-4 w-full rounded-sm border border-ink-black/20 bg-paper-warm/40 px-3 py-2 font-serif text-ink-black placeholder:text-ink-black/40 focus:outline-none focus:ring-2 focus:ring-ember/50"
+                autoFocus
+              />
+              <div className="mt-4 space-y-1 max-h-[54vh] overflow-auto pr-2">
+                {SPREADS.map((s, i) => {
+                  const q = tocQuery.trim().toLowerCase();
+                  if (q && !`${s.title} ${s.chapterTitle}`.toLowerCase().includes(q)) return null;
+                  const visited = state.visited.includes(i);
+                  const isBookmark = state.bookmark === i;
+                  return (
+                    <button
+                      key={s.id}
+                      type="button"
+                      onClick={() => {
+                        goto(i);
+                        setTocOpen(false);
+                      }}
+                      className={`w-full text-left px-3 py-2 flex items-baseline gap-3 rounded-sm hover:bg-ember/10 ${
+                        i === pageIndex ? "bg-ember/15" : ""
+                      }`}
+                    >
+                      <span className="font-numeral text-lg text-ember w-10 shrink-0">{i + 1}</span>
+                      <span className="font-serif text-ink-black text-base flex-1">
+                        {s.title}
+                        {isBookmark && <span className="ml-2 text-crimson">⚑</span>}
+                      </span>
+                      <span className="font-hand text-sm text-ink-black/60">{s.chapterTitle}</span>
+                      <span
+                        className={`h-2 w-2 rounded-full ${visited ? "bg-ember/80" : "bg-ink-black/15"}`}
+                        title={visited ? "Visited" : "Unvisited"}
+                      />
+                    </button>
+                  );
+                })}
+              </div>
+              <div className="mt-4 text-[10px] font-display tracking-[0.3em] uppercase text-ink-black/50">
+                {state.visited.length} / {total} pages visited
               </div>
               <button
                 type="button"
