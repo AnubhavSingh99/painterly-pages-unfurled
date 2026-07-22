@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 
-const KEY = "codex:v1";
+const KEY = "aarvi-margins:v2";
 
 export type BookState = {
   currentSpread: number;
@@ -78,7 +78,7 @@ export function useBookState() {
 
 export type SpreadMeta = {
   id: string;
-  chapter: 0 | 1 | 2 | 3 | 4; // 0 front matter, 1-3 chapters, 4 back matter
+  chapter: 0 | 1 | 2 | 3 | 4 | 5 | 6; // 0 front matter, 1-5 chapters, 6 back matter
   chapterTitle: string;
   title: string;
 };
@@ -87,21 +87,99 @@ export const SPREADS: SpreadMeta[] = [
   { id: "cover", chapter: 0, chapterTitle: "Front", title: "Cover" },
   { id: "title", chapter: 0, chapterTitle: "Front", title: "Title Page" },
   { id: "toc", chapter: 0, chapterTitle: "Front", title: "Contents" },
-  { id: "ch1-opener", chapter: 1, chapterTitle: "I · Copperline After Dark", title: "Copperline After Dark" },
-  { id: "ch1-text", chapter: 1, chapterTitle: "I · Copperline After Dark", title: "The Paint-Runner" },
-  { id: "ch1-dialogue", chapter: 1, chapterTitle: "I · Copperline After Dark", title: "On the Roof" },
-  { id: "ch2-opener", chapter: 2, chapterTitle: "II · The Machinist's Debt", title: "Down the Copper Stair" },
-  { id: "ch2-scrapbook", chapter: 2, chapterTitle: "II · The Machinist's Debt", title: "Pinned Evidence" },
-  { id: "ch2-character", chapter: 2, chapterTitle: "II · The Machinist's Debt", title: "The Machinist" },
-  { id: "ch3-opener", chapter: 3, chapterTitle: "III · What the Ink Remembers", title: "The Walls Wake Up" },
-  { id: "ch3-climax", chapter: 3, chapterTitle: "III · What the Ink Remembers", title: "Lightning on the Rooftop" },
-  { id: "ch3-closing", chapter: 3, chapterTitle: "III · What the Ink Remembers", title: "Unfinished" },
-  { id: "gallery", chapter: 4, chapterTitle: "Extras", title: "Gallery" },
-  { id: "credits", chapter: 4, chapterTitle: "Extras", title: "Credits" },
+  {
+    id: "style-tests",
+    chapter: 1,
+    chapterTitle: "I · Style and Mascot Creation",
+    title: "Finding Aarvi",
+  },
+  {
+    id: "personalization",
+    chapter: 1,
+    chapterTitle: "I · Style and Mascot Creation",
+    title: "Making Her Feel Real",
+  },
+  {
+    id: "identity",
+    chapter: 2,
+    chapterTitle: "II · Character Bible",
+    title: "Character Bible",
+  },
+  {
+    id: "wardrobe",
+    chapter: 2,
+    chapterTitle: "II · Character Bible",
+    title: "Outfit Construction",
+  },
+  {
+    id: "visual-development-one",
+    chapter: 3,
+    chapterTitle: "III · Visual Development",
+    title: "Shape and Face",
+  },
+  {
+    id: "visual-development-two",
+    chapter: 3,
+    chapterTitle: "III · Visual Development",
+    title: "Hair and Hands",
+  },
+  {
+    id: "worlds",
+    chapter: 4,
+    chapterTitle: "IV · Lore and Alternate Worlds",
+    title: "Two Worlds",
+  },
+  {
+    id: "studio-social",
+    chapter: 4,
+    chapterTitle: "IV · Lore and Alternate Worlds",
+    title: "Studio and Voice",
+  },
+  {
+    id: "lore",
+    chapter: 4,
+    chapterTitle: "IV · Lore and Alternate Worlds",
+    title: "The Girl in the Wrong World",
+  },
+  {
+    id: "lore-profile",
+    chapter: 4,
+    chapterTitle: "IV · Lore and Alternate Worlds",
+    title: "Quiet Outside, Universe Inside",
+  },
+  {
+    id: "lore-symbols",
+    chapter: 4,
+    chapterTitle: "IV · Lore and Alternate Worlds",
+    title: "A Girl Carrying Two Worlds",
+  },
+  { id: "anime-divider", chapter: 5, chapterTitle: "V · Comic Pages", title: "Anime Comic" },
+  { id: "anime-1", chapter: 5, chapterTitle: "V · Comic Pages", title: "Anime 1" },
+  { id: "anime-2", chapter: 5, chapterTitle: "V · Comic Pages", title: "Anime 2" },
+  { id: "anime-3", chapter: 5, chapterTitle: "V · Comic Pages", title: "Anime 3" },
+  { id: "anime-4", chapter: 5, chapterTitle: "V · Comic Pages", title: "Anime 4" },
+  { id: "anime-5", chapter: 5, chapterTitle: "V · Comic Pages", title: "Anime 5" },
+  { id: "webtoon-divider", chapter: 5, chapterTitle: "V · Comic Pages", title: "Webtoon Comic" },
+  { id: "webtoon-1", chapter: 5, chapterTitle: "V · Comic Pages", title: "Webtoon 1" },
+  { id: "webtoon-2", chapter: 5, chapterTitle: "V · Comic Pages", title: "Webtoon 2" },
+  { id: "webtoon-3", chapter: 5, chapterTitle: "V · Comic Pages", title: "Webtoon 3" },
+  { id: "webtoon-4", chapter: 5, chapterTitle: "V · Comic Pages", title: "Webtoon 4" },
+  { id: "webtoon-5", chapter: 5, chapterTitle: "V · Comic Pages", title: "Webtoon 5" },
+  { id: "game-divider", chapter: 5, chapterTitle: "V · Comic Pages", title: "Game-Style Comic" },
+  { id: "game-1", chapter: 5, chapterTitle: "V · Comic Pages", title: "Game 1" },
+  { id: "game-2", chapter: 5, chapterTitle: "V · Comic Pages", title: "Game 2" },
+  { id: "game-3", chapter: 5, chapterTitle: "V · Comic Pages", title: "Game 3" },
+  { id: "game-4", chapter: 5, chapterTitle: "V · Comic Pages", title: "Game 4" },
+  { id: "game-5", chapter: 5, chapterTitle: "V · Comic Pages", title: "Game 5" },
+  { id: "final-archive", chapter: 6, chapterTitle: "Archive", title: "Final Boards" },
+  { id: "downloads", chapter: 6, chapterTitle: "Archive", title: "Downloads" },
+  { id: "credits", chapter: 6, chapterTitle: "Archive", title: "Credits" },
 ];
 
 export const CHAPTERS = [
-  { n: 1, title: "Copperline After Dark", firstSpread: 3 },
-  { n: 2, title: "The Machinist's Debt", firstSpread: 6 },
-  { n: 3, title: "What the Ink Remembers", firstSpread: 9 },
+  { n: 1, label: "I", title: "Style and Mascot Creation", firstSpread: 3 },
+  { n: 2, label: "II", title: "Character Bible", firstSpread: 5 },
+  { n: 3, label: "III", title: "Visual Development", firstSpread: 7 },
+  { n: 4, label: "IV", title: "Lore and Alternate Worlds", firstSpread: 9 },
+  { n: 5, label: "V", title: "Comic Pages", firstSpread: 14 },
 ];

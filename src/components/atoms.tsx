@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode, type CSSProperties } from "react";
 
+type CustomCssProperties = CSSProperties & Record<`--${string}`, string | number>;
+
 /* ============================================================
    Global overlays: film grain, vignette, dust
    ============================================================ */
@@ -28,26 +30,32 @@ export function DustField({ count = 26, className = "" }: { count?: number; clas
         opacity: 0.3 + Math.random() * 0.5,
         i,
       })),
-    [count]
+    [count],
   );
-  if (!mounted) return <div className={`pointer-events-none absolute inset-0 z-30 ${className}`} aria-hidden />;
+  if (!mounted)
+    return <div className={`pointer-events-none absolute inset-0 z-30 ${className}`} aria-hidden />;
   return (
-    <div className={`pointer-events-none absolute inset-0 z-30 overflow-hidden ${className}`} aria-hidden>
+    <div
+      className={`pointer-events-none absolute inset-0 z-30 overflow-hidden ${className}`}
+      aria-hidden
+    >
       {motes.map((m) => (
         <span
           key={m.i}
           className="absolute rounded-full bg-paper"
-          style={{
-            left: `${m.left}%`,
-            top: `${m.top}%`,
-            width: `${m.size}px`,
-            height: `${m.size}px`,
-            opacity: m.opacity,
-            boxShadow: "0 0 4px rgba(239,228,201,0.6)",
-            animation: `dust-drift ${m.duration}s linear ${m.delay}s infinite`,
-            ["--dx" as any]: `${m.dx}px`,
-            ["--dy" as any]: `${m.dy}px`,
-          } as CSSProperties}
+          style={
+            {
+              left: `${m.left}%`,
+              top: `${m.top}%`,
+              width: `${m.size}px`,
+              height: `${m.size}px`,
+              opacity: m.opacity,
+              boxShadow: "0 0 4px rgba(239,228,201,0.6)",
+              animation: `dust-drift ${m.duration}s linear ${m.delay}s infinite`,
+              "--dx": `${m.dx}px`,
+              "--dy": `${m.dy}px`,
+            } as CustomCssProperties
+          }
         />
       ))}
     </div>
@@ -237,7 +245,7 @@ export function ParallaxScene({
     <div
       ref={ref}
       className={className}
-      style={{ ["--px" as any]: 0, ["--py" as any]: 0, ["--parallax" as any]: strength }}
+      style={{ "--px": 0, "--py": 0, "--parallax": strength } as CustomCssProperties}
     >
       {children}
     </div>

@@ -1,22 +1,28 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import deskBook from "@/assets/desk-book.jpg";
-import { DustField, GrainOverlay, ParallaxLayer, ParallaxScene, Vignette } from "@/components/atoms";
+import deskBook from "@/assets/aarvi/first-character.png";
+import {
+  DustField,
+  GrainOverlay,
+  ParallaxLayer,
+  ParallaxScene,
+  Vignette,
+} from "@/components/atoms";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "The Ink & Ember Codex — an interactive painterly book" },
+      { title: "The World in Her Margins - complete creation archive" },
       {
         name: "description",
         content:
-          "Open a hand-painted digital sketchbook found in a fantasy-industrial workshop. Turn pages, uncover hidden ink, and read Vess Marlow's story in three illustrated chapters.",
+          "Open Aarvi's complete interactive creation archive: style studies, character sheets, lore, anime pages, webtoon pages, game comics, and book downloads.",
       },
-      { property: "og:title", content: "The Ink & Ember Codex — an interactive painterly book" },
+      { property: "og:title", content: "The World in Her Margins - complete creation archive" },
       {
         property: "og:description",
         content:
-          "Open a hand-painted digital sketchbook found in a fantasy-industrial workshop. Turn pages, uncover hidden ink, and read Vess Marlow's story in three illustrated chapters.",
+          "Move through Aarvi's full creation order, from first character studies to the finished comic and book archive.",
       },
       { property: "og:type", content: "book" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -34,8 +40,7 @@ function DeskPage() {
       <div
         className="absolute inset-0 -z-10"
         style={{
-          background:
-            "radial-gradient(ellipse at 50% 55%, #2a1e33 0%, #0e1424 45%, #05070d 100%)",
+          background: "radial-gradient(ellipse at 50% 55%, #372139 0%, #121425 45%, #05070d 100%)",
         }}
       />
 
@@ -46,7 +51,7 @@ function DeskPage() {
             className="absolute -top-24 left-1/2 -translate-x-1/2 w-[110%] h-[80%] opacity-25"
             style={{
               background:
-                "conic-gradient(from 200deg at 50% 0%, transparent 0deg, rgba(193,80,42,0.35) 10deg, transparent 30deg, transparent 330deg, rgba(184,137,47,0.35) 350deg, transparent 360deg)",
+                "conic-gradient(from 200deg at 50% 0%, transparent 0deg, rgba(214,58,143,0.28) 10deg, transparent 30deg, transparent 330deg, rgba(184,137,47,0.35) 350deg, transparent 360deg)",
               filter: "blur(30px)",
             }}
           />
@@ -62,10 +67,10 @@ function DeskPage() {
           >
             <img
               src={deskBook}
-              alt="Closed antique hardcover book resting on an artist's desk"
+              alt="Aarvi character illustration"
               width={1600}
               height={1008}
-              className="max-h-[80vh] w-auto ink-drop-shadow"
+              className="max-h-[78vh] w-auto rounded-sm border border-paper/20 object-contain ink-drop-shadow"
               draggable={false}
             />
           </div>
@@ -82,10 +87,10 @@ function DeskPage() {
             VOLUME · I
           </div>
           <h1 className="mt-2 font-display font-black text-paper text-3xl md:text-5xl leading-none drop-shadow-[0_4px_0_rgba(0,0,0,0.6)]">
-            THE INK &amp; EMBER CODEX
+            THE WORLD IN HER MARGINS
           </h1>
           <div className="mt-2 font-hand text-xl md:text-2xl text-paper/80">
-            found in a workshop above the Copperline — half-finished, still warm.
+            the complete character archive, from first sketch to comic universe.
           </div>
         </div>
 
@@ -104,12 +109,18 @@ function DeskPage() {
           >
             <span
               className="inline-block h-2 w-2 rounded-full bg-ember"
-              style={{ animation: "ember-flicker 1.6s ease-in-out infinite", boxShadow: "0 0 12px var(--color-ember)" }}
+              style={{
+                animation: "ember-flicker 1.6s ease-in-out infinite",
+                boxShadow: "0 0 12px var(--color-ember)",
+              }}
             />
-            Open the Book
+            Open the Archive
             <span
               className="inline-block h-2 w-2 rounded-full bg-ember"
-              style={{ animation: "ember-flicker 1.4s ease-in-out infinite", boxShadow: "0 0 12px var(--color-ember)" }}
+              style={{
+                animation: "ember-flicker 1.4s ease-in-out infinite",
+                boxShadow: "0 0 12px var(--color-ember)",
+              }}
             />
           </Link>
           <div className="mt-4 font-hand text-lg text-paper/60">
@@ -123,10 +134,10 @@ function DeskPage() {
 
       {/* Corner ambient hints */}
       <div className="pointer-events-none absolute bottom-3 left-4 font-display text-[10px] tracking-[0.4em] text-paper/40">
-        AN INTERACTIVE PAINTERLY BOOK
+        COMPLETE CREATION ARCHIVE
       </div>
       <div className="pointer-events-none absolute bottom-3 right-4 font-hand text-sm text-paper/50">
-        est. Copperline, mmxxvi
+        Aarvi, mmxxvi
       </div>
     </main>
   );

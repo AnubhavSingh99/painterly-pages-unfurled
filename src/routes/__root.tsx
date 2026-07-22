@@ -78,14 +78,34 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { name: "theme-color", content: "#08090f" },
-      { title: "The Ink & Ember Codex — an interactive painterly book" },
-      { property: "og:title", content: "The Ink & Ember Codex — an interactive painterly book" },
-      { name: "twitter:title", content: "The Ink & Ember Codex — an interactive painterly book" },
-      { name: "description", content: "Open a hand-painted digital sketchbook found in a fantasy-industrial workshop. Turn pages, uncover hidden ink, and read Vess Marlow's story in three illustrated chapters." },
-      { property: "og:description", content: "Open a hand-painted digital sketchbook found in a fantasy-industrial workshop. Turn pages, uncover hidden ink, and read Vess Marlow's story in three illustrated chapters." },
-      { name: "twitter:description", content: "Open a hand-painted digital sketchbook found in a fantasy-industrial workshop. Turn pages, uncover hidden ink, and read Vess Marlow's story in three illustrated chapters." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/f4b6a43f-c0a4-4594-bf4c-90bba0bea748/id-preview-2ec50111--308df762-5f13-4368-8b90-ae28798de06e.lovable.app-1784650039664.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/f4b6a43f-c0a4-4594-bf4c-90bba0bea748/id-preview-2ec50111--308df762-5f13-4368-8b90-ae28798de06e.lovable.app-1784650039664.png" },
+      { title: "The World in Her Margins - complete creation archive" },
+      { property: "og:title", content: "The World in Her Margins - complete creation archive" },
+      { name: "twitter:title", content: "The World in Her Margins - complete creation archive" },
+      {
+        name: "description",
+        content:
+          "Open Aarvi's complete interactive creation archive: style studies, character sheets, lore, anime pages, webtoon pages, game comics, and book downloads.",
+      },
+      {
+        property: "og:description",
+        content:
+          "Open Aarvi's interactive sketchbook: a quiet engineering student draws the life she was meant to live through comics, character sheets, and hidden fragments.",
+      },
+      {
+        name: "twitter:description",
+        content:
+          "Open Aarvi's interactive sketchbook: a quiet engineering student draws the life she was meant to live through comics, character sheets, and hidden fragments.",
+      },
+      {
+        property: "og:image",
+        content:
+          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/f4b6a43f-c0a4-4594-bf4c-90bba0bea748/id-preview-2ec50111--308df762-5f13-4368-8b90-ae28798de06e.lovable.app-1784650039664.png",
+      },
+      {
+        name: "twitter:image",
+        content:
+          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/f4b6a43f-c0a4-4594-bf4c-90bba0bea748/id-preview-2ec50111--308df762-5f13-4368-8b90-ae28798de06e.lovable.app-1784650039664.png",
+      },
       { name: "twitter:card", content: "summary_large_image" },
       { property: "og:type", content: "website" },
     ],

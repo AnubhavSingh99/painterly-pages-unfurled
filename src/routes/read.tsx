@@ -8,14 +8,17 @@ import { BrassButton, GrainOverlay, Vignette } from "@/components/atoms";
 export const Route = createFileRoute("/read")({
   head: () => ({
     meta: [
-      { title: "Read — The Ink & Ember Codex" },
+      { title: "Read - The World in Her Margins" },
       {
         name: "description",
         content:
-          "Turn the pages of an illustrated fantasy-industrial sketchbook. Painterly two-page spreads, hidden interactions, and three chapters of Vess Marlow's story.",
+          "Turn the pages of Aarvi's illustrated sketchbook: classroom, margins, inner worlds, and the dream of an artist's life in New York.",
       },
-      { property: "og:title", content: "Read — The Ink & Ember Codex" },
-      { property: "og:description", content: "An interactive painterly book you can turn page by page." },
+      { property: "og:title", content: "Read - The World in Her Margins" },
+      {
+        property: "og:description",
+        content: "An interactive sketchbook you can turn page by page.",
+      },
       { property: "og:type", content: "book" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -34,14 +37,120 @@ function useIsMobile() {
   return m;
 }
 
+function playPageTurn(ctx: AudioContext) {
+  const now = ctx.currentTime;
+  const noiseBuffer = ctx.createBuffer(1, ctx.sampleRate * 0.18, ctx.sampleRate);
+  const data = noiseBuffer.getChannelData(0);
+  for (let i = 0; i < data.length; i += 1) {
+    data[i] = (Math.random() * 2 - 1) * (1 - i / data.length);
+  }
+
+  const source = ctx.createBufferSource();
+  const filter = ctx.createBiquadFilter();
+  const gain = ctx.createGain();
+  source.buffer = noiseBuffer;
+  filter.type = "highpass";
+  filter.frequency.setValueAtTime(900, now);
+  gain.gain.setValueAtTime(0.0001, now);
+  gain.gain.exponentialRampToValueAtTime(0.08, now + 0.018);
+  gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.18);
+  source.connect(filter);
+  filter.connect(gain);
+  gain.connect(ctx.destination);
+  source.start(now);
+  source.stop(now + 0.2);
+}
+
+function useBookAudio(soundEnabled: boolean, musicEnabled: boolean, pageIndex: number) {
+  const audioRef = useRef<AudioContext | null>(null);
+  const pageRef = useRef(pageIndex);
+  const musicRef = useRef<{ osc: OscillatorNode; lfo: OscillatorNode; gain: GainNode } | null>(
+    null,
+  );
+
+  const ensureAudio = useCallback(() => {
+    const AudioCtor =
+      window.AudioContext ||
+      (window as typeof window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+    if (!AudioCtor) throw new Error("Web Audio is not supported in this browser.");
+    if (!audioRef.current) audioRef.current = new AudioCtor();
+    if (audioRef.current.state === "suspended") void audioRef.current.resume();
+    return audioRef.current;
+  }, []);
+
+  useEffect(() => {
+    if (!soundEnabled || pageRef.current === pageIndex) {
+      pageRef.current = pageIndex;
+      return;
+    }
+    playPageTurn(ensureAudio());
+    pageRef.current = pageIndex;
+  }, [ensureAudio, pageIndex, soundEnabled]);
+
+  useEffect(() => {
+    if (!musicEnabled) {
+      musicRef.current?.osc.stop();
+      musicRef.current?.lfo.stop();
+      musicRef.current = null;
+      return;
+    }
+
+    const ctx = ensureAudio();
+    const now = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const lfo = ctx.createOscillator();
+    const lfoGain = ctx.createGain();
+    const gain = ctx.createGain();
+    const filter = ctx.createBiquadFilter();
+
+    osc.type = "triangle";
+    osc.frequency.setValueAtTime(146.83, now);
+    lfo.type = "sine";
+    lfo.frequency.setValueAtTime(0.08, now);
+    lfoGain.gain.setValueAtTime(18, now);
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.exponentialRampToValueAtTime(0.035, now + 1.2);
+    filter.type = "lowpass";
+    filter.frequency.setValueAtTime(850, now);
+
+    lfo.connect(lfoGain);
+    lfoGain.connect(osc.frequency);
+    osc.connect(filter);
+    filter.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(now);
+    lfo.start(now);
+    musicRef.current = { osc, lfo, gain };
+
+    return () => {
+      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.12);
+      osc.stop(ctx.currentTime + 0.14);
+      lfo.stop(ctx.currentTime + 0.14);
+      musicRef.current = null;
+    };
+  }, [ensureAudio, musicEnabled]);
+
+  return ensureAudio;
+}
+
 function ReadPage() {
   const { state, hydrated, setSpread, unlock, setSignature, toggleSound, toggleMusic } =
     useBookState();
   const isMobile = useIsMobile();
 
   const [tocOpen, setTocOpen] = useState(false);
+  const [lightbox, setLightbox] = useState<{ src: string; alt: string } | null>(null);
   const [direction, setDirection] = useState<1 | -1>(1);
   const total = SPREADS.length;
+  const fragmentLabels = ["Lore", "Visual Bible", "Comic Run"];
+  const extrasSpread = useMemo(
+    () =>
+      Math.max(
+        0,
+        SPREADS.findIndex((spread) => spread.id === "final-archive"),
+      ),
+    [],
+  );
 
   // Only start from stored spread once hydrated
   const [pageIndex, setPageIndex] = useState(0);
@@ -57,7 +166,7 @@ function ReadPage() {
       setPageIndex(clamped);
       setSpread(clamped);
     },
-    [pageIndex, setSpread, total]
+    [pageIndex, setSpread, total],
   );
 
   const next = useCallback(() => goto(pageIndex + 1, 1), [pageIndex, goto]);
@@ -82,11 +191,37 @@ function ReadPage() {
   const onTouchEnd = (e: React.TouchEvent) => {
     if (touchStart.current == null) return;
     const dx = e.changedTouches[0].clientX - touchStart.current;
-    if (Math.abs(dx) > 60) (dx < 0 ? next() : prev());
+    if (Math.abs(dx) > 60) {
+      if (dx < 0) next();
+      else prev();
+    }
     touchStart.current = null;
   };
 
   const meta = SPREADS[pageIndex];
+  useEffect(() => {
+    if (!hydrated || !meta) return;
+
+    if (meta.id.startsWith("lore")) unlock(0);
+    else if (
+      [
+        "identity",
+        "wardrobe",
+        "visual-development-one",
+        "visual-development-two",
+        "worlds",
+      ].includes(meta.id)
+    ) {
+      unlock(1);
+    } else if (
+      /^anime-\d+$/.test(meta.id) ||
+      /^webtoon-\d+$/.test(meta.id) ||
+      /^game-\d+$/.test(meta.id)
+    ) {
+      unlock(2);
+    }
+  }, [hydrated, meta, unlock]);
+
   const ctx = useMemo(
     () => ({
       onJump: (n: number) => goto(n),
@@ -95,7 +230,7 @@ function ReadPage() {
       onSign: (s: string) => setSignature(s),
       unlocked: state.unlockedFragments,
     }),
-    [goto, unlock, setSignature, state.signature, state.unlockedFragments]
+    [goto, unlock, setSignature, state.signature, state.unlockedFragments],
   );
 
   // Book-open intro animation
@@ -110,19 +245,55 @@ function ReadPage() {
     else document.documentElement.requestFullscreen().catch(() => {});
   }, []);
 
+  const ensureAudio = useBookAudio(state.soundEnabled, state.musicEnabled, pageIndex);
+  const toggleSoundWithAudio = useCallback(() => {
+    ensureAudio();
+    toggleSound();
+  }, [ensureAudio, toggleSound]);
+  const toggleMusicWithAudio = useCallback(() => {
+    ensureAudio();
+    toggleMusic();
+  }, [ensureAudio, toggleMusic]);
+  const openImage = useCallback((e: React.MouseEvent<HTMLElement>) => {
+    const target = e.target;
+    if (!(target instanceof HTMLElement)) return;
+    if (target.closest("button, a, input")) return;
+
+    if (target instanceof HTMLImageElement) {
+      setLightbox({
+        src: target.currentSrc || target.src,
+        alt: target.alt || "Aarvi archive image",
+      });
+      return;
+    }
+
+    const opener = target.closest<HTMLElement>("[data-open-image-src]");
+    const src = opener?.dataset.openImageSrc;
+    if (!src) return;
+    setLightbox({ src, alt: opener.dataset.openImageAlt || "Aarvi archive image" });
+  }, []);
+
   return (
     <main
       className="fixed inset-0 overflow-hidden bg-ink-black text-paper"
       onTouchStart={onTouchStart}
       onTouchEnd={onTouchEnd}
+      onClickCapture={openImage}
     >
       {/* Ambient backdrop */}
       <div
         className="absolute inset-0 -z-10"
         style={{
-          background:
-            "radial-gradient(ellipse at 50% 40%, #241832 0%, #0d1220 55%, #05060b 100%)",
+          background: "radial-gradient(ellipse at 50% 40%, #241832 0%, #0d1220 55%, #05060b 100%)",
         }}
+      />
+      <div
+        className="pointer-events-none absolute left-[-8%] top-[12%] h-20 w-[42%] rotate-[-11deg] border-y border-gold/15 bg-crimson/10 blur-[1px]"
+        style={{ clipPath: "polygon(0 48%, 88% 0, 100% 18%, 12% 100%)" }}
+      />
+      <div
+        className="pointer-events-none absolute bottom-[12%] right-[-10%] h-24 w-[48%] rotate-[9deg] border-y border-teal/15 bg-teal/10 blur-[1px]"
+        style={{ clipPath: "polygon(8% 0, 100% 34%, 84% 100%, 0 60%)" }}
       />
 
       {/* Book stage */}
@@ -143,13 +314,13 @@ function ReadPage() {
           >
             {/* Book thickness / edge shading */}
             <div className="absolute -inset-3 rounded-sm bg-ink-navy shadow-[0_40px_80px_-20px_rgba(0,0,0,0.9)]" />
-            <div className="absolute -inset-2 rounded-sm"
-                 style={{
-                   background:
-                     "linear-gradient(180deg, #221a2e 0%, #16121c 100%)",
-                   boxShadow:
-                     "inset 0 0 0 1px rgba(184,137,47,0.15), inset 0 30px 60px rgba(0,0,0,0.55)",
-                 }}
+            <div
+              className="absolute -inset-2 rounded-sm"
+              style={{
+                background: "linear-gradient(180deg, #221a2e 0%, #16121c 100%)",
+                boxShadow:
+                  "inset 0 0 0 1px rgba(184,137,47,0.15), inset 0 30px 60px rgba(0,0,0,0.55)",
+              }}
             />
             {/* Gutter shadow */}
             {!isMobile && (
@@ -181,7 +352,10 @@ function ReadPage() {
                   }}
                   transition={{ duration: 0.7, ease: [0.7, 0, 0.3, 1] }}
                   className="absolute inset-0"
-                  style={{ transformOrigin: direction === 1 ? "left center" : "right center", transformStyle: "preserve-3d" }}
+                  style={{
+                    transformOrigin: direction === 1 ? "left center" : "right center",
+                    transformStyle: "preserve-3d",
+                  }}
                 >
                   {renderSpread(pageIndex, ctx)}
                   {/* Page turn shadow sweep */}
@@ -261,13 +435,13 @@ function ReadPage() {
               }}
               title={c.title}
             >
-              Ch. {c.n === 1 ? "I" : c.n === 2 ? "II" : "III"}
+              Ch. {c.label}
             </button>
           );
         })}
         <button
           type="button"
-          onClick={() => goto(12)}
+          onClick={() => goto(extrasSpread)}
           className="group relative px-3 py-3 text-[10px] font-display tracking-[0.3em] uppercase bg-gold/80 text-ink-black -translate-x-2 hover:translate-x-0 transition-all"
           style={{
             writingMode: "vertical-rl",
@@ -281,18 +455,23 @@ function ReadPage() {
 
       {/* Chrome — top-left TOC / back */}
       <div className="absolute top-4 left-4 z-40 flex gap-2">
-        <Link to="/" className="brass-button rounded-sm px-3 py-2 text-[10px] font-display tracking-[0.3em] uppercase inline-flex items-center gap-2">
+        <Link
+          to="/"
+          className="brass-button rounded-sm px-3 py-2 text-[10px] font-display tracking-[0.3em] uppercase inline-flex items-center gap-2"
+        >
           ← Desk
         </Link>
-        <BrassButton small onClick={() => setTocOpen(true)}>Contents</BrassButton>
+        <BrassButton small onClick={() => setTocOpen(true)}>
+          Contents
+        </BrassButton>
       </div>
 
       {/* Chrome — top-right controls */}
-      <div className="absolute top-4 right-4 z-40 flex gap-2">
-        <BrassButton small onClick={toggleSound} ariaLabel="Toggle sound">
+      <div className="absolute right-4 top-14 z-40 flex gap-2 sm:top-4">
+        <BrassButton small onClick={toggleSoundWithAudio} ariaLabel="Toggle sound">
           {state.soundEnabled ? "Sound ●" : "Sound ○"}
         </BrassButton>
-        <BrassButton small onClick={toggleMusic} ariaLabel="Toggle music">
+        <BrassButton small onClick={toggleMusicWithAudio} ariaLabel="Toggle music">
           {state.musicEnabled ? "Music ●" : "Music ○"}
         </BrassButton>
         <BrassButton small onClick={fullscreen} ariaLabel="Fullscreen">
@@ -337,7 +516,7 @@ function ReadPage() {
         </div>
       </div>
 
-      {/* Fragments HUD */}
+      {/* Progress fragments HUD */}
       <div className="absolute top-20 left-4 z-40 flex flex-col gap-1">
         {state.unlockedFragments.map((u, i) => (
           <div
@@ -345,13 +524,13 @@ function ReadPage() {
             className={`flex items-center gap-2 text-[10px] font-display tracking-[0.3em] uppercase ${
               u ? "text-ember" : "text-paper/40"
             }`}
-            title={u ? `Fragment ${i + 1} unlocked` : `Fragment ${i + 1} locked`}
+            title={u ? `${fragmentLabels[i]} unlocked` : `${fragmentLabels[i]} locked`}
           >
             <span
               className={`h-2 w-2 rounded-full ${u ? "bg-ember" : "bg-paper/20"}`}
               style={u ? { boxShadow: "0 0 8px var(--color-ember)" } : {}}
             />
-            Fragment {["I", "II", "III"][i]}
+            {fragmentLabels[i]}
           </div>
         ))}
       </div>
@@ -411,6 +590,33 @@ function ReadPage() {
 
       <Vignette />
       <GrainOverlay />
+
+      <AnimatePresence>
+        {lightbox && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 z-[70] flex items-center justify-center bg-ink-black/92 p-4 backdrop-blur-sm"
+            onClick={() => setLightbox(null)}
+          >
+            <button
+              type="button"
+              className="absolute right-4 top-4 brass-button rounded-sm px-3 py-2 font-display text-[10px] uppercase tracking-[0.3em]"
+              onClick={() => setLightbox(null)}
+            >
+              Close
+            </button>
+            <img
+              src={lightbox.src}
+              alt={lightbox.alt}
+              className="max-h-[92vh] max-w-[94vw] object-contain shadow-[0_30px_90px_rgba(0,0,0,0.8)]"
+              draggable={false}
+              onClick={(e) => e.stopPropagation()}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </main>
   );
 }
