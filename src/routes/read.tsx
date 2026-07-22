@@ -196,16 +196,86 @@ function ReadPage() {
   const next = useCallback(() => goto(pageIndex + 1, 1), [pageIndex, goto]);
   const prev = useCallback(() => goto(pageIndex - 1, -1), [pageIndex, goto]);
 
+  // Bookmark helpers
+  const jumpBookmark = useCallback(() => {
+    if (state.bookmark == null) {
+      showToast("No bookmark saved yet");
+      return;
+    }
+    goto(state.bookmark);
+    showToast(`Jumped to page ${state.bookmark + 1}`);
+  }, [state.bookmark, goto, showToast]);
+
+  const saveBookmark = useCallback(() => {
+    setBookmark(pageIndex);
+    showToast(`Bookmarked page ${pageIndex + 1}`);
+  }, [pageIndex, setBookmark, showToast]);
+
   // Keyboard nav
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      const t = e.target as HTMLElement | null;
+      if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.isContentEditable)) return;
       if (e.key === "ArrowRight") next();
       else if (e.key === "ArrowLeft") prev();
-      else if (e.key === "Escape") setTocOpen(false);
+      else if (e.key === "Home") goto(0);
+      else if (e.key === "End") goto(total - 1);
+      else if (e.key === "Escape") {
+        setTocOpen(false);
+        setSettingsOpen(false);
+        setHelpOpen(false);
+        setLightbox(null);
+      } else if (e.key === "?" || (e.shiftKey && e.key === "/")) setHelpOpen((v) => !v);
+      else if (e.key === "t" || e.key === "T") setTocOpen((v) => !v);
+      else if (e.key === "s" || e.key === "S") setSettingsOpen((v) => !v);
+      else if (e.key === "b") saveBookmark();
+      else if (e.key === "B") jumpBookmark();
+      else if (e.key === " ") {
+        e.preventDefault();
+        toggleAutoplay();
+      } else if (e.key === "+" || e.key === "=") setFontScale(state.fontScale + 0.05);
+      else if (e.key === "-" || e.key === "_") setFontScale(state.fontScale - 0.05);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [next, prev]);
+  }, [
+    next,
+    prev,
+    goto,
+    total,
+    saveBookmark,
+    jumpBookmark,
+    toggleAutoplay,
+    setFontScale,
+    state.fontScale,
+  ]);
+
+  // Autoplay: advance every N seconds, with a visible progress bar.
+  useEffect(() => {
+    if (!state.autoplay) {
+      setAutoplayProgress(0);
+      return;
+    }
+    const total = state.autoplaySec * 1000;
+    const start = performance.now();
+    let raf = 0;
+    const tick = (t: number) => {
+      const elapsed = t - start;
+      const p = Math.min(1, elapsed / total);
+      setAutoplayProgress(p);
+      if (p >= 1) {
+        if (pageIndex >= SPREADS.length - 1) {
+          toggleAutoplay();
+        } else {
+          next();
+        }
+        return;
+      }
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [state.autoplay, state.autoplaySec, pageIndex, next, toggleAutoplay]);
 
   // Swipe nav
   const touchStart = useRef<number | null>(null);
