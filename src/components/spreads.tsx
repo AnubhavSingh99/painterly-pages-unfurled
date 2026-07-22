@@ -511,26 +511,31 @@ function OfficialProfileSpread() {
         fit="contain"
         className="absolute right-[3%] top-[5%] h-[90%] w-[52%] opacity-95 max-md:opacity-35"
       />
-      <div className="relative z-10 flex h-full max-w-xl flex-col justify-center p-7 md:p-12">
-        <ArchiveLabel eyebrow="Official Character Card" title="Aarvi" light>
-          A quiet artist disguised as a practical student. She carries her sketchbook like a private
-          door, and every drawing becomes a rehearsal for freedom.
-        </ArchiveLabel>
-        <div className="mt-7 grid gap-3">
-          {stats.map(([label, value]) => (
-            <div
-              key={label}
-              className="grid grid-cols-[0.38fr_1fr] gap-3 border-b border-paper/15 pb-2"
-            >
-              <div className="font-display text-[10px] uppercase tracking-[0.28em] text-crimson">
-                {label}
+      <div className="relative z-10 flex h-full max-w-[29rem] flex-col justify-center p-7 md:p-12">
+        <div className="border border-gold/25 bg-ink-black/78 p-5 shadow-2xl shadow-ink-black/50 backdrop-blur-sm md:p-6">
+          <ArchiveLabel eyebrow="Official Character Card" title="Aarvi" light>
+            <span className="text-paper/90">
+              A quiet artist disguised as a <span className="text-gold">practical student</span>.
+              She carries her sketchbook like a private door, and every drawing becomes a rehearsal
+              for freedom.
+            </span>
+          </ArchiveLabel>
+          <div className="mt-7 grid gap-3">
+            {stats.map(([label, value]) => (
+              <div
+                key={label}
+                className="grid grid-cols-[0.38fr_1fr] gap-3 border-b border-paper/15 pb-2"
+              >
+                <div className="font-display text-[10px] uppercase tracking-[0.28em] text-crimson">
+                  {label}
+                </div>
+                <div className="font-serif text-sm text-gold/95 md:text-base">{value}</div>
               </div>
-              <div className="font-serif text-sm text-paper/84 md:text-base">{value}</div>
-            </div>
-          ))}
-        </div>
-        <div className="mt-7 border-l-4 border-gold bg-paper/10 p-4 font-hand text-2xl leading-tight text-gold">
-          "I draw the life I want until I can finally live it."
+            ))}
+          </div>
+          <div className="mt-7 border-l-4 border-gold bg-paper/12 p-4 font-hand text-2xl leading-tight text-gold">
+            "I draw the life I want until I can finally live it."
+          </div>
         </div>
       </div>
     </Page>
