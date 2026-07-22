@@ -552,7 +552,7 @@ function ReadPage() {
       </nav>
 
       {/* Chrome — top-left TOC / back */}
-      <div className="absolute top-4 left-4 z-40 flex gap-2">
+      <div className="absolute top-4 left-4 z-40 flex flex-wrap gap-2 max-w-[60%]">
         <Link
           to="/"
           className="brass-button rounded-sm px-3 py-2 text-[10px] font-display tracking-[0.3em] uppercase inline-flex items-center gap-2"
@@ -562,20 +562,74 @@ function ReadPage() {
         <BrassButton small onClick={() => setTocOpen(true)}>
           Contents
         </BrassButton>
+        <BrassButton small onClick={saveBookmark} ariaLabel="Save bookmark" title="Save bookmark (b)">
+          ⚑ Save
+        </BrassButton>
+        <BrassButton
+          small
+          onClick={jumpBookmark}
+          ariaLabel="Jump to bookmark"
+          title="Jump to bookmark (Shift+B)"
+        >
+          {state.bookmark != null ? `→ p.${state.bookmark + 1}` : "No mark"}
+        </BrassButton>
       </div>
 
       {/* Chrome — top-right controls */}
-      <div className="absolute right-4 top-14 z-40 flex gap-2 sm:top-4">
+      <div className="absolute right-4 top-14 z-40 flex flex-wrap justify-end gap-2 sm:top-4 max-w-[60%]">
         <BrassButton small onClick={toggleSoundWithAudio} ariaLabel="Toggle sound">
           {state.soundEnabled ? "Sound ●" : "Sound ○"}
         </BrassButton>
         <BrassButton small onClick={toggleMusicWithAudio} ariaLabel="Toggle music">
           {state.musicEnabled ? "Music ●" : "Music ○"}
         </BrassButton>
+        <BrassButton small onClick={toggleAutoplay} ariaLabel="Toggle autoplay" title="Autoplay (space)">
+          {state.autoplay ? "Auto ▶" : "Auto ▷"}
+        </BrassButton>
+        <BrassButton small onClick={() => setSettingsOpen(true)} title="Reader settings (s)">
+          ⚙
+        </BrassButton>
+        <BrassButton small onClick={() => setHelpOpen(true)} title="Keyboard shortcuts (?)">
+          ?
+        </BrassButton>
         <BrassButton small onClick={fullscreen} ariaLabel="Fullscreen">
           ⛶
         </BrassButton>
       </div>
+
+      {/* Autoplay progress bar (top of screen) */}
+      {state.autoplay && (
+        <div className="absolute left-0 right-0 top-0 z-40 h-0.5 bg-paper/10">
+          <div
+            className="h-full bg-ember transition-[width] duration-100 ease-linear"
+            style={{
+              width: `${Math.round(autoplayProgress * 100)}%`,
+              boxShadow: "0 0 8px var(--color-ember)",
+            }}
+          />
+        </div>
+      )}
+
+      {/* Signature margin — visible once signed */}
+      {state.signature && (
+        <div className="pointer-events-none absolute bottom-24 left-4 z-40 font-hand text-xl text-gold/80 rotate-[-4deg]">
+          — signed by {state.signature}
+        </div>
+      )}
+
+      {/* Toast */}
+      <AnimatePresence>
+        {toast && (
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 8 }}
+            className="absolute top-4 left-1/2 -translate-x-1/2 z-50 rounded-sm bg-ink-navy/95 border border-gold/40 px-4 py-2 font-display text-[10px] tracking-[0.3em] uppercase text-paper shadow-lg"
+          >
+            {toast}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Chrome — bottom: progress + indicator */}
       <div className="absolute bottom-4 left-0 right-0 z-40 flex flex-col items-center gap-2 px-6">
